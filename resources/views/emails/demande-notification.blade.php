@@ -7,7 +7,7 @@ Une nouvelle demande de document a été soumise par {{ $demande->utilisateur->n
 
 * **Document:** {{ $demande->document->titre }}
 * **Description:** {{ $demande->description }}
-* **Date de soumission:** {{ $demande->dateSoumission->format('d/m/Y H:i') }}
+* **Date de soumission:** {{ (new DateTime( $demande->dateSoumission))->format('d/m/Y H:i') }}
 
 Veuillez traiter cette demande dès que possible.
 

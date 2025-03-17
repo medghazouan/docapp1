@@ -9,7 +9,7 @@ Vous pouvez récupérer le document. Veuillez trouver ci-joint le certificat d'a
 
 * **Document:** {{ $demande->document->titre }}
 * **Description:** {{ $demande->description }}
-* **Date de soumission:** {{ $demande->dateSoumission->format('d/m/Y H:i') }}
+* **Date de soumission:** {{ ( new DateTime($demande->dateSoumission))->format('d/m/Y H:i') }}
 
 @component('mail::button', ['url' => route('certificats.show', $certificat->idCertificat)])
 Voir le Certificat

@@ -112,7 +112,7 @@
                     </tr>
                     <tr>
                         <th>{{ __('Validation responsable') }}</th>
-                        <td>{{ $demande->dateValidationResponsable ? $demande->dateValidationResponsable->format('d/m/Y H:i') : 'En attente' }}</td>
+                        <td>{{ (new DateTime($demande->dateValidationResponsable))  ? ( new DateTime($demande->dateValidationResponsable) )->format('d/m/Y H:i') : 'En attente' }}</td>
                     </tr>
                     <tr>
                         <th>{{ __('Archiviste') }}</th>
@@ -120,11 +120,11 @@
                     </tr>
                     <tr>
                         <th>{{ __('Validation archiviste') }}</th>
-                        <td>{{ $demande->dateValidationArchiviste ? $demande->dateValidationArchiviste->format('d/m/Y H:i') : 'En attente' }}</td>
+                        <td>{{ (new DateTime($demande->dateValidationArchiviste) ) ? (new DateTime($demande->dateValidationArchiviste) )->format('d/m/Y H:i') : 'En attente' }}</td>
                     </tr>
                     <tr>
                         <th>{{ __('Récupération') }}</th>
-                        <td>{{ $demande->dateRecuperation ? $demande->dateRecuperation->format('d/m/Y H:i') : 'Non récupéré' }}</td>
+                        <td>{{ (new DateTime($demande->dateRecuperation) ) ? (new DateTime($demande->dateRecuperation) )->format('d/m/Y H:i') : 'Non récupéré' }}</td>
                     </tr>
                 </table>
             </div>
@@ -136,9 +136,7 @@
                 <h6 class="mb-0">{{ __('Certificat disponible') }}</h6>
             </div>
             <div class="card-body">
-                <p>{{ __('Date de génération:') }} {{ $demande->certificat->dateGeneration->format('d/m/Y H:i') }}</p>
-                <p>{{ __('Signature:') }} 
-                    @if($demande->certificat->signatureUtilisateur)
+                <p>{{ __('Date de génération:') }} {{(new DateTime(json_decode($demande->certificat)->dateGeneration))->format('d/m/Y H:i') }}</p>                    @if($demande->certificat->signatureUtilisateur)
                         <span class="badge bg-success">{{ __('Signé') }}</span>
                     @else
                         <span class="badge bg-warning">{{ __('Non signé') }}</span>
@@ -164,12 +162,12 @@
                 @if(Auth::user()->role == 'responsable' && Auth::user()->idUtilisateur == $demande->idResponsableService && $demande->statut == 'en_attente')
                 <div class="row">
                     <div class="col-md-6">
-                        <form method="POST" action="{{ route('demandes.approve.responsable', $demande->idDemande) }}">
+                       
+                        <form action="{{ route('demandes.approve.responsable', $demande->idDemande) }}" method="POST" >
                             @csrf
-                            <button type="submit" class="btn btn-success w-100">
-                                <i class="fas fa-check"></i> {{ __('Approuver') }}
-                            </button>
+                            <button type="submit" class="btn btn-sm btn-success w-100">Approuver</button>
                         </form>
+                        
                     </div>
                     <div class="col-md-6">
                         <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectResponsableModal">

@@ -35,19 +35,19 @@
                         </div>
                          <div class="mb-3">
                             <label for="Fonction" class="form-label">Fonction</label>
-                            <input type="text" name="Fonction" id="Fonction" class="form-control" >
+                            <input type="text" name="fonction" id="fonction" class="form-control" >
                         </div>
                          <div class="mb-3">
                             <label for="Societe" class="form-label">Societe</label>
-                            <input type="text" name="Societe" id="Societe" class="form-control" >
+                            <input type="text" name="societe" id="societe" class="form-control" >
                         </div>
                          <div class="mb-3">
                             <label for="Direction" class="form-label">Direction</label>
-                            <input type="text" name="Direction" id="Direction" class="form-control" >
+                            <input type="text" name="direction" id="direction" class="form-control" >
                         </div>
                          <div class="mb-3">
                             <label for="Service" class="form-label">Service</label>
-                            <input type="text" name="Service" id="Service" class="form-control" >
+                            <input type="text" name="service" id="service" class="form-control" >
                         </div>
                         <div class="mb-3">
                             <label for="role" class="form-label">Role</label>

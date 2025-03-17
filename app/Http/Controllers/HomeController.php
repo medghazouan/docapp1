@@ -31,16 +31,36 @@ class HomeController extends Controller
             'demandes_en_attente' => 0
         ];
         
-        if ($user->role == 'responsable') {
+        if ($user->role == 'admin') {
+            $demandes = DemandeDocument::with(['utilisateur', 'document'])->latest()->paginate(10);
+            $stats['demandes_en_attente'] = DemandeDocument::where('statut', 'en_attente')->count(); // Optionally, count all pending demands
+        } elseif ($user->role == 'responsable') {
+            $demandes = DemandeDocument::where('idResponsableService', $user->idUtilisateur)
+            ->orWhere('idUtilisateur', $user->idUtilisateur)
+            ->with(['utilisateur', 'document'])
+            ->latest()
+            ->paginate(10);
             $stats['demandes_en_attente'] = DemandeDocument::where('idResponsableService', $user->idUtilisateur)
                 ->where('statut', 'en_attente')
                 ->count();
         } elseif ($user->role == 'archiviste') {
+            $demandes = DemandeDocument::where('statut', 'approuvé_responsable')
+            ->orWhere('idArchiviste', $user->idUtilisateur)
+            ->orWhere('idUtilisateur', $user->idUtilisateur)
+            ->with(['utilisateur', 'document'])
+            ->latest()
+            ->paginate(10);
             $stats['demandes_en_attente'] = DemandeDocument::where('idArchiviste', $user->idUtilisateur)
                 ->where('statut', 'approuvé_responsable')
                 ->count();
+        }else{
+            $demandes = DemandeDocument::where('idUtilisateur', $user->idUtilisateur)
+                ->with(['document'])
+                ->latest()
+                ->paginate(10);
         }
+
         
-        return view('home', compact('stats', 'unreadNotifications'));
+        return view('home', compact('stats', 'unreadNotifications','demandes'));
     }
 }

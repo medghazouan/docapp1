@@ -44,14 +44,15 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        
         $request->validate([
             'nom' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'Fonction' => 'nullable|string|max:255',
-            'Societe' => 'nullable|string|max:255',
-            'Direction' => 'nullable|string|max:255',
-            'Service' => 'nullable|string|max:255',
+            'fonction' => 'nullable|string|max:255',
+            'societe' => 'nullable|string|max:255',
+            'direction' => 'nullable|string|max:255',
+            'service' => 'nullable|string|max:255',
             'role' => 'required|string|in:Utilisateur,Responsable,Archiviste,Admin',
         ]);
 
@@ -59,10 +60,10 @@ class AuthController extends Controller
             'nom' => $request->nom,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'Fonction' => $request->Fonction,
-            'Societe' => $request->Societe,
-            'Direction' => $request->Direction,
-            'Service' => $request->Service,
+            'fonction' => $request->fonction,
+            'societe' => $request->societe,
+            'direction' => $request->direction,
+            'service' => $request->service,
             'role' => $request->role,
         ]);
 
