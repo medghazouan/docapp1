@@ -82,7 +82,48 @@
                     </div>
 
                     <!-- Admin-specific stats -->
+
                     @if(Auth::user()->role == 'admin')
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4>Filtrer les demandes</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <form action="{{ route('home') }}" method="GET" class="row">
+                                            <div class="col-md-3 form-group">
+                                                <label for="utilisateur">Nom d'utilisateur</label>
+                                                <input type="text" name="utilisateur" id="utilisateur" class="form-control" value="{{ request('utilisateur') }}">
+                                            </div>
+                                            <div class="col-md-2 form-group">
+                                                <label for="date_debut">Date début</label>
+                                                <input type="date" name="date_debut" id="date_debut" class="form-control" value="{{ request('date_debut') }}">
+                                            </div>
+                                            <div class="col-md-2 form-group">
+                                                <label for="date_fin">Date fin</label>
+                                                <input type="date" name="date_fin" id="date_fin" class="form-control" value="{{ request('date_fin') }}">
+                                            </div>
+                                            <div class="col-md-2 form-group">
+                                                <label for="statut">Statut</label>
+                                                <select name="statut" id="statut" class="form-control">
+                                                    <option value="">Tous</option>
+                                                    <option value="en_attente" {{ request('statut') == 'en_attente' ? 'selected' : '' }}>En attente</option>
+                                                    <option value="approuvé_responsable" {{ request('statut') == 'approuvé_responsable' ? 'selected' : '' }}>Approuvé par responsable</option>
+                                                    <option value="approuvé_archiviste" {{ request('statut') == 'approuvé_archiviste' ? 'selected' : '' }}>Approuvé par archiviste</option>
+                                                    <option value="rejeté" {{ request('statut') == 'rejeté' ? 'selected' : '' }}>Rejeté</option>
+                                                    <option value="terminé" {{ request('statut') == 'terminé' ? 'selected' : '' }}>Terminé</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 form-group d-flex align-items-end">
+                                                <button type="submit" class="btn btn-primary mr-2">Filtrer</button>
+                                                <a href="{{ route('home') }}" class="btn btn-secondary">Réinitialiser</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row mt-4">
                             <div class="col-md-12">
                                 <div class="card">
@@ -383,16 +424,16 @@
                                                     <td>{{ $demande->document->titre }}</td>
                                                     <td>{{ $demande->dateSoumission }}</td>
                                                     <td>
-                                                        @if($demande->statut == 'soumise')
-                                                            <span class="badge badge-info">Soumise</span>
-                                                        @elseif($demande->statut == 'validee_responsable')
-                                                            <span class="badge badge-primary">Validée par responsable</span>
-                                                        @elseif($demande->statut == 'validee_archiviste')
-                                                            <span class="badge badge-success">Prête pour récupération</span>
-                                                        @elseif($demande->statut == 'rejetee')
-                                                            <span class="badge badge-danger">Rejetée</span>
-                                                        @elseif($demande->statut == 'terminee')
-                                                            <span class="badge badge-secondary">Terminée</span>
+                                                        @if($demande->statut == 'en_attente')
+                                                            <span class="badge badge status-{{ $demande->statut }}">Soumise</span>
+                                                        @elseif($demande->statut == 'approuvé_responsable')
+                                                            <span class="badge badge status-{{ $demande->statut }}">Validée par responsable</span>
+                                                        @elseif($demande->statut == 'approuvé_archiviste')
+                                                            <span class="badge badge status-{{ $demande->statut }}">Prête pour récupération</span>
+                                                        @elseif($demande->statut == 'refusé_responsable||refusé_archiviste')
+                                                            <span class="badge badge status-{{ $demande->statut }}">Rejetée</span>
+                                                        @elseif($demande->statut == 'récupéré')
+                                                            <span class="badge badge status-{{ $demande->statut }}">récupéré</span>
                                                         @endif
                                                     </td>
                                                     <td>{{ $demande->updated_at }}</td>

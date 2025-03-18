@@ -78,7 +78,7 @@
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
                                     <span class="fw-bold">Demande #{{ $demande->idDemande }}</span> -
-                                     {{ $demande->dateSoumission->format('d/m/Y') }}
+                                     {{ (new DateTime($demande->dateSoumission) )->format('d/m/Y') }}
                                 </div>
                                 <span class="badge status-{{ $demande->statut }}">
                                     @switch($demande->statut)
@@ -114,9 +114,7 @@
                 </table>
             </div>
             
-            <div class="d-flex justify-content-center mt-4">
-                {{ $demandes->links() }}
-            </div>
+            
         @else
             <div class="alert alert-info">
                 Aucune demande de document trouvée.

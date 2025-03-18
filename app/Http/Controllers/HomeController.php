@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use App\Models\DemandeDocument;
@@ -17,7 +16,7 @@ class HomeController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $unreadNotifications = Notification::where('idDestinataire', $user->idUtilisateur)
@@ -32,8 +31,44 @@ class HomeController extends Controller
         ];
         
         if ($user->role == 'admin') {
-            $demandes = DemandeDocument::with(['utilisateur', 'document'])->latest()->paginate(10);
-            $stats['demandes_en_attente'] = DemandeDocument::where('statut', 'en_attente')->count(); // Optionally, count all pending demands
+            // Apply filters for admin
+            $demandesQuery = DemandeDocument::with(['utilisateur', 'document']);
+            
+            // Filter by user name if provided
+            if ($request->filled('utilisateur')) {
+                $userName = $request->utilisateur;
+                $demandesQuery->whereHas('utilisateur', function($query) use ($userName) {
+                    $query->where('nom', 'like', '%' . $userName . '%');
+                });
+            }
+            
+            // Filter by date range if provided
+            if ($request->filled('date_debut')) {
+                $demandesQuery->where('dateSoumission', '>=', $request->date_debut);
+            }
+            
+            if ($request->filled('date_fin')) {
+                $demandesQuery->where('dateSoumission', '<=', $request->date_fin);
+            }
+            
+            // Filter by status if provided
+            if ($request->filled('statut')) {
+                $demandesQuery->where('statut', $request->statut);
+            }
+            
+            // Get filtered demands
+            $demandes = $demandesQuery->latest()->paginate(10);
+            $stats['demandes_en_attente'] = DemandeDocument::where('statut', 'en_attente')->count();
+            
+            // Add status distribution stats for charts
+            $stats['statusDistribution'] = [
+                'en_attente' => DemandeDocument::where('statut', 'en_attente')->count(),
+                'approuvé_responsable' => DemandeDocument::where('statut', 'approuvé_responsable')->count(),
+                'approuvé_archiviste' => DemandeDocument::where('statut', 'approuvé_archiviste')->count(),
+                'rejeté' => DemandeDocument::where('statut', 'rejeté')->count(),
+                'terminé' => DemandeDocument::where('statut', 'terminé')->count()
+            ];
+            
         } elseif ($user->role == 'responsable') {
             $demandes = DemandeDocument::where('idResponsableService', $user->idUtilisateur)
             ->orWhere('idUtilisateur', $user->idUtilisateur)
@@ -53,14 +88,13 @@ class HomeController extends Controller
             $stats['demandes_en_attente'] = DemandeDocument::where('idArchiviste', $user->idUtilisateur)
                 ->where('statut', 'approuvé_responsable')
                 ->count();
-        }else{
+        } else {
             $demandes = DemandeDocument::where('idUtilisateur', $user->idUtilisateur)
                 ->with(['document'])
                 ->latest()
                 ->paginate(10);
         }
 
-        
-        return view('home', compact('stats', 'unreadNotifications','demandes'));
+        return view('home', compact('stats', 'unreadNotifications', 'demandes'));
     }
 }
