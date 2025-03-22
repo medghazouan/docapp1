@@ -18,67 +18,80 @@
                             <i class="fas fa-bell"></i> Vous avez {{ $unreadNotifications }} notification(s) non lue(s).
                             <a href="{{ route('notifications.index') }}" class="alert-link">Voir les notifications</a>
                         </div>
-                    @endif
+                    @endif
 
                     <h2>Bienvenue, {{ Auth::user()->nom }}!</h2>
-                    <p>Vous êtes connecté en tant que <strong>{{ ucfirst(Auth::user()->role) }}</strong>.</p>
+                    <p id="role">Vous êtes connecté en tant que <strong >{{ ucfirst(Auth::user()->role) }}</strong>.</p>
 
                     <div class="row mt-4">
                         <!-- Stats cards - visible to all roles -->
-                        <div class="col-md-3 mb-4">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body">
-                                    <h5 class="card-title">Mes demandes</h5>
-                                    <p class="card-text display-4">{{ $stats['mes_demandes'] }}</p>
-                                    <a href="{{ route('demandes.index') }}" class="btn btn-sm btn-light">Voir mes demandes</a>
-                                </div>
-                            </div>
-                        </div>
                         
-                        <!-- Notifications card - visible to all roles -->
-                        <div class="col-md-3 mb-4">
-                            <div class="card bg-info text-white">
-                                <div class="card-body">
-                                    <h5 class="card-title">Notifications</h5>
-                                    <p class="card-text display-4">{{ $unreadNotifications }}</p>
-                                    <a href="{{ route('notifications.index') }}" class="btn btn-sm btn-light">Voir notifications</a>
-                                </div>
+                    <div class="col-md-3 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-icon">
+                                <i class="fas fa-file-alt"></i>
                             </div>
+                            <h5>Mes demandes</h5>
+                            <div class="stats-value">{{ $stats['mes_demandes'] }}</div>
+                            <a href="{{ route('demandes.index') }}" class="stats-link">
+                                Voir détails <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
+                    </div>
 
-                        <!-- Pending requests card - visible to responsables and archivistes -->
-                        @if(Auth::user()->role == 'responsable' || Auth::user()->role == 'archiviste' || Auth::user()->role == 'admin')
-                        <div class="col-md-3 mb-4">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        @if(Auth::user()->role == 'responsable')
-                                            Demandes en attente
-                                        @elseif(Auth::user()->role == 'archiviste')
-                                            À valider
-                                        @else
-                                            Demandes en cours
-                                        @endif
-                                    </h5>
-                                    <p class="card-text display-4">{{ $stats['demandes_en_attente'] }}</p>
-                                    <a href="{{ route('demandes.index') }}" class="btn btn-sm btn-light">Traiter les demandes</a>
-                                </div>
+                    <!-- Notifications card -->
+                    <div class="col-md-3 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-icon">
+                                <i class="fas fa-bell"></i>
                             </div>
+                            <h5>Notifications</h5>
+                            <div class="stats-value">{{ $unreadNotifications }}</div>
+                            <a href="{{ route('notifications.index') }}" class="stats-link">
+                                Voir détails <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
-                        @endif
+                    </div>
 
-                        <!-- Documents stats card - visible to admin and archiviste -->
-                        @if(Auth::user()->role == 'admin' || Auth::user()->role == 'archiviste')
-                        <div class="col-md-3 mb-4">
-                            <div class="card bg-success text-white">
-                                <div class="card-body">
-                                    <h5 class="card-title">Documents totaux</h5>
-                                    <p class="card-text display-4">{{ $stats['total_documents'] }}</p>
-                                    <a href="{{ route('documents.index') }}" class="btn btn-sm btn-light">Gérer les documents</a>
-                                </div>
+                    <!-- Pending Requests card - visible to specific roles -->
+                    @if(Auth::user()->role == 'responsable' || Auth::user()->role == 'archiviste' || Auth::user()->role == 'admin')
+                    <div class="col-md-3 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-icon">
+                                <i class="fas fa-clock"></i>
                             </div>
+                            <h5>
+                                @if(Auth::user()->role == 'responsable')
+                                    Demandes en attente
+                                @elseif(Auth::user()->role == 'archiviste')
+                                    À valider
+                                @else
+                                    Demandes en cours
+                                @endif
+                            </h5>
+                            <div class="stats-value">{{ $stats['demandes_en_attente'] }}</div>
+                            <a href="{{ route('demandes.index') }}" class="stats-link">
+                                Traiter les demandes <i class="fas fa-arrow-right"></i>
+                            </a>
                         </div>
-                        @endif
+                    </div>
+                    @endif
+
+                    <!-- Documents stats card - visible to admin and archiviste -->
+                    @if(Auth::user()->role == 'admin' || Auth::user()->role == 'archiviste')
+                    <div class="col-md-3 mb-4">
+                        <div class="stats-card">
+                            <div class="stats-icon">
+                                <i class="fas fa-folder"></i>
+                            </div>
+                            <h5>Documents totaux</h5>
+                            <div class="stats-value">{{ $stats['total_documents'] }}</div>
+                            <a href="{{ route('documents.index') }}" class="stats-link">
+                                Gérer les documents <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    @endif
                     </div>
 
                     <!-- Admin-specific stats -->
@@ -87,59 +100,126 @@
                         <div class="row mt-4">
                             <div class="col-md-12">
                                 <div class="card">
-                                    <div class="card-header">
-                                        <h4>Filtrer les demandes</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <form action="{{ route('home') }}" method="GET" class="row">
-                                            <div class="col-md-3 form-group">
-                                                <label for="utilisateur">Nom d'utilisateur</label>
-                                                <input type="text" name="utilisateur" id="utilisateur" class="form-control" value="{{ request('utilisateur') }}">
-                                            </div>
-                                            <div class="col-md-2 form-group">
-                                                <label for="type">Type de document</label>
-                                                <select name="type" id="type" class="form-control">
-                                                    <option value="">Tous</option>
-                                                    @foreach($documentTypes as $type)
-                                                        <option value="{{ $type }}" {{ request('type') == $type ? 'selected' : '' }}>{{ $type }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="col-md-2 form-group">
-                                                <label for="service">Service</label>
-                                                <select name="service" id="service" class="form-control">
-                                                    <option value="">Tous</option>
-                                                    @foreach($services as $service)
-                                                        <option value="{{ $service }}" {{ request('service') == $service ? 'selected' : '' }}>{{ $service }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="col-md-2 form-group">
-                                                <label for="date_debut">Date début</label>
-                                                <input type="date" name="date_debut" id="date_debut" class="form-control" value="{{ request('date_debut') }}">
-                                            </div>
-                                            <div class="col-md-2 form-group">
-                                                <label for="date_fin">Date fin</label>
-                                                <input type="date" name="date_fin" id="date_fin" class="form-control" value="{{ request('date_fin') }}">
-                                            </div>
-                                            
-                                            <div class="col-md-2 form-group">
-                                                <label for="statut">Statut</label>
-                                                <select name="statut" id="statut" class="form-control">
-                                                    <option value="">Tous</option>
-                                                    <option value="en_attente" {{ request('statut') == 'en_attente' ? 'selected' : '' }}>En attente</option>
-                                                    <option value="approuvé_responsable" {{ request('statut') == 'approuvé_responsable' ? 'selected' : '' }}>Approuvé par responsable</option>
-                                                    <option value="refusé_responsable" {{ request('statut') == 'refusé_responsable' ? 'selected' : '' }}>Refusé par responsable</option>
-                                                    <option value="approuvé_archiviste" {{ request('statut') == 'approuvé_archiviste' ? 'selected' : '' }}>Approuvé par archiviste</option>
-                                                    <option value="refusé_archiviste" {{ request('statut') == 'refusé_archiviste' ? 'selected' : '' }}>Refusé par archiviste</option>
-                                                    <option value="récupéré" {{ request('statut') == 'récupéré' ? 'selected' : '' }}>Récupéré</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-3 form-group d-flex align-items-end">
-                                                <button type="submit" class="btn btn-primary mr-2">Filtrer</button>
-                                                <a href="{{ route('home') }}" class="btn btn-secondary">Réinitialiser</a>
-                                            </div>
-                                        </form>
+                                   <!-- Replace the existing filter form section -->
+                                    <div class="filters-card mb-4">
+                                        <div class="card-header">
+                                            <h4><i class="fas fa-filter"></i> Filtrer les demandes</h4>
+                                        </div>
+                                        <div class="card-body">
+                                            <form action="{{ route('home') }}" method="GET" class="row g-3">
+                                                <div class="col-md-3">
+                                                    <div class="form-group custom-form-group">
+                                                        <label for="utilisateur">
+                                                            <i class="fas fa-user"></i> Nom d'utilisateur
+                                                        </label>
+                                                        <input type="text" 
+                                                            name="utilisateur" 
+                                                            id="utilisateur" 
+                                                            class="form-control custom-input" 
+                                                            value="{{ request('utilisateur') }}"
+                                                            >
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-2">
+                                                    <div class="form-group custom-form-group">
+                                                        <label for="type">
+                                                            <i class="fas fa-file-alt"></i> Type de document
+                                                        </label>
+                                                        <select name="type" id="type" class="form-control custom-select">
+                                                            <option value="">Tous les types</option>
+                                                            @foreach($documentTypes as $type)
+                                                                <option value="{{ $type }}" {{ request('type') == $type ? 'selected' : '' }}>
+                                                                    {{ $type }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-2">
+                                                    <div class="form-group custom-form-group">
+                                                        <label for="service">
+                                                            <i class="fas fa-building"></i> Service
+                                                        </label>
+                                                        <select name="service" id="service" class="form-control custom-select">
+                                                            <option value="">Tous les services</option>
+                                                            @foreach($services as $service)
+                                                                <option value="{{ $service }}" {{ request('service') == $service ? 'selected' : '' }}>
+                                                                    {{ $service }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-2">
+                                                    <div class="form-group custom-form-group">
+                                                        <label for="date_debut">
+                                                            <i class="fas fa-calendar-alt"></i> Date début
+                                                        </label>
+                                                        <input type="date" 
+                                                            name="date_debut" 
+                                                            id="date_debut" 
+                                                            class="form-control custom-input" 
+                                                            value="{{ request('date_debut') }}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-2">
+                                                    <div class="form-group custom-form-group">
+                                                        <label for="date_fin">
+                                                            <i class="fas fa-calendar-alt"></i> Date fin
+                                                        </label>
+                                                        <input type="date" 
+                                                            name="date_fin" 
+                                                            id="date_fin" 
+                                                            class="form-control custom-input" 
+                                                            value="{{ request('date_fin') }}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <div class="form-group custom-form-group">
+                                                        <label for="statut">
+                                                            <i class="fas fa-tasks"></i> Statut
+                                                        </label>
+                                                        <select name="statut" id="statut" class="form-control custom-select">
+                                                            <option value="">Tous les statuts</option>
+                                                            <option value="en_attente" {{ request('statut') == 'en_attente' ? 'selected' : '' }}>
+                                                                En attente
+                                                            </option>
+                                                            <option value="approuvé_responsable" {{ request('statut') == 'approuvé_responsable' ? 'selected' : '' }}>
+                                                                Approuvé par responsable
+                                                            </option>
+                                                            <option value="refusé_responsable" {{ request('statut') == 'refusé_responsable' ? 'selected' : '' }}>
+                                                                Refusé par responsable
+                                                            </option>
+                                                            <option value="approuvé_archiviste" {{ request('statut') == 'approuvé_archiviste' ? 'selected' : '' }}>
+                                                                Approuvé par archiviste
+                                                            </option>
+                                                            <option value="refusé_archiviste" {{ request('statut') == 'refusé_archiviste' ? 'selected' : '' }}>
+                                                                Refusé par archiviste
+                                                            </option>
+                                                            <option value="récupéré" {{ request('statut') == 'récupéré' ? 'selected' : '' }}>
+                                                                Récupéré
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-12 mt-3">
+                                                    <div class="filter-buttons">
+                                                        <button type="submit" class="btn custom-btn-primary">
+                                                            <i class="fas fa-search"></i> Filtrer
+                                                        </button>
+                                                        <a href="{{ route('home') }}" class="btn custom-btn-secondary">
+                                                            <i class="fas fa-undo"></i> Réinitialiser
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -488,17 +568,28 @@
                                                     <td>{{ $demande->document->titre }}</td>
                                                     <td>{{ $demande->dateSoumission }}</td>
                                                     <td>
-                                                        @if($demande->statut == 'en_attente')
-                                                            <span class="badge status-en_attente">Soumise</span>
-                                                        @elseif($demande->statut == 'approuvé_responsable')
-                                                            <span class="badge status-approuvé_responsable">Validée par responsable</span>
-                                                        @elseif($demande->statut == 'approuvé_archiviste')
-                                                            <span class="badge status-approuvé_archiviste">Prête pour récupération</span>
-                                                        @elseif($demande->statut == 'refusé_responsable||refusé_archiviste')
-                                                            <span class="badge badge status-{{ $demande->statut }}">Rejetée</span>
-                                                        @elseif($demande->statut == 'récupéré')
-                                                            <span class="badge badge status-{{ $demande->statut }}">Terminé</span>
-                                                        @endif
+                                                        <span class="badge status-{{ $demande->statut }}">
+                                                            @switch($demande->statut)
+                                                                @case('en_attente')
+                                                                    En attente
+                                                                    @break
+                                                                @case('approuvé_responsable')
+                                                                    Approuvé par responsable
+                                                                    @break
+                                                                @case('refusé_responsable')
+                                                                    Refusé par responsable
+                                                                    @break
+                                                                @case('approuvé_archiviste')
+                                                                    Approuvé par archiviste
+                                                                    @break
+                                                                @case('refusé_archiviste')
+                                                                    Refusé par archiviste
+                                                                    @break
+                                                                @case('récupéré')
+                                                                    Récupéré
+                                                                    @break
+                                                            @endswitch
+                                                        </span>
                                                     </td>
                                                     <td>{{ $demande->updated_at }}</td>
                                                     <td>
