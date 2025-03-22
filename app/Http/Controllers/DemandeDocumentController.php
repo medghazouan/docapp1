@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\DemandeDocumentNotification;
 use App\Mail\DemandeDocumentApprouvee;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 
 class DemandeDocumentController extends Controller
@@ -152,19 +154,32 @@ class DemandeDocumentController extends Controller
         return redirect()->route('demandes.index')->with('success', 'Demande refusée avec succès.');
     }
     public function approveByArchiviste(Request $request, $id)
-    {
-        $demande = DemandeDocument::findOrFail($id);
-        
-        if (Auth::user()->idUtilisateur != $demande->idArchiviste) {
-            return back()->withErrors(['message' => 'Vous n\'êtes pas autorisé à approuver cette demande.']);
-        }
-        
-        $demande->update([
-            'statut' => 'approuvé_archiviste',
-            'dateValidationArchiviste' => now()
-        ]);
-        
-        // Créer un certificat d'approbation
+{
+    $demande = DemandeDocument::findOrFail($id);
+
+    // Vérification des autorisations
+    if (Auth::user()->idUtilisateur != $demande->idArchiviste) {
+        return redirect()->route('demandes.index')
+            ->with('error', 'Action non autorisée');
+    }
+
+    // Validation unique et renforcée
+    $validated = $request->validate([
+        'dateRecuperation' => [
+            'required', 
+            'date', 
+            'after_or_equal:' . now()->addHours(24)->format('Y-m-d\TH:i') // Délai de 24h minimum
+        ]
+    ]);
+
+    // Mise à jour complète
+    $demande->update([
+        'statut' => 'approuvé_archiviste',
+        'dateRecuperation' => $validated['dateRecuperation']
+    ]);
+
+    // Création du certificat avec gestion d'erreur
+    try {
         $certificat = Certificat::create([
             'idDemande' => $demande->idDemande,
             'idUtilisateur' => $demande->idUtilisateur,
@@ -172,20 +187,26 @@ class DemandeDocumentController extends Controller
             'dateGeneration' => now(),
             'signatureUtilisateur' => false
         ]);
-        
-        // Créer une notification pour l'utilisateur
-        Notification::create([
-            'idDestinataire' => $demande->idUtilisateur,
-            'message' => 'Votre demande de document a été approuvée. Vous pouvez récupérer le document.',
-            'dateEnvoi' => now()
-        ]);
-        
-        // Envoyer un email à l'utilisateur
-        //Mail::to($demande->utilisateur->email)->send(new DemandeDocumentApprouvee($demande, $certificat));
-        
-        return redirect()->route('demandes.index')->with('success', 'Demande approuvée avec succès. Certificat généré.');
+    } catch (\Exception $e) {
+        Log::error("Erreur création certificat: " . $e->getMessage());
+        return back()->with('error', 'Erreur lors de la génération du certificat');
     }
 
+    // Notification
+    Notification::create([
+        'idDestinataire' => $demande->idUtilisateur,
+        'message' => 'Votre demande de document "'.$demande->document->titre.'" a été approuvée. Date de récupération: ' 
+                     . Carbon::parse($validated['dateRecuperation'])->translatedFormat('d F Y \à H\hi'),
+        'dateEnvoi' => now()
+    ]);
+
+    // Décommenter pour l'envoi réel
+    // Mail::to($demande->utilisateur->email)->queue(new DemandeDocumentApprouvee($demande, $certificat));
+
+    return redirect()->route('demandes.index')
+        ->with('success', 'Demande approuvée - Récupération prévue le ' 
+              . Carbon::parse($validated['dateRecuperation'])->translatedFormat('d/m/Y à H\hi'));
+}
     public function rejectByArchiviste(Request $request, $id)
     {
         $request->validate([
