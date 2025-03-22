@@ -97,6 +97,24 @@
                                                 <input type="text" name="utilisateur" id="utilisateur" class="form-control" value="{{ request('utilisateur') }}">
                                             </div>
                                             <div class="col-md-2 form-group">
+                                                <label for="type">Type de document</label>
+                                                <select name="type" id="type" class="form-control">
+                                                    <option value="">Tous</option>
+                                                    @foreach($documentTypes as $type)
+                                                        <option value="{{ $type }}" {{ request('type') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 form-group">
+                                                <label for="service">Service</label>
+                                                <select name="service" id="service" class="form-control">
+                                                    <option value="">Tous</option>
+                                                    @foreach($services as $service)
+                                                        <option value="{{ $service }}" {{ request('service') == $service ? 'selected' : '' }}>{{ $service }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 form-group">
                                                 <label for="date_debut">Date début</label>
                                                 <input type="date" name="date_debut" id="date_debut" class="form-control" value="{{ request('date_debut') }}">
                                             </div>
@@ -104,15 +122,17 @@
                                                 <label for="date_fin">Date fin</label>
                                                 <input type="date" name="date_fin" id="date_fin" class="form-control" value="{{ request('date_fin') }}">
                                             </div>
+                                            
                                             <div class="col-md-2 form-group">
                                                 <label for="statut">Statut</label>
                                                 <select name="statut" id="statut" class="form-control">
                                                     <option value="">Tous</option>
                                                     <option value="en_attente" {{ request('statut') == 'en_attente' ? 'selected' : '' }}>En attente</option>
                                                     <option value="approuvé_responsable" {{ request('statut') == 'approuvé_responsable' ? 'selected' : '' }}>Approuvé par responsable</option>
+                                                    <option value="refusé_responsable" {{ request('statut') == 'refusé_responsable' ? 'selected' : '' }}>Refusé par responsable</option>
                                                     <option value="approuvé_archiviste" {{ request('statut') == 'approuvé_archiviste' ? 'selected' : '' }}>Approuvé par archiviste</option>
-                                                    <option value="rejeté" {{ request('statut') == 'rejeté' ? 'selected' : '' }}>Rejeté</option>
-                                                    <option value="terminé" {{ request('statut') == 'terminé' ? 'selected' : '' }}>Terminé</option>
+                                                    <option value="refusé_archiviste" {{ request('statut') == 'refusé_archiviste' ? 'selected' : '' }}>Refusé par archiviste</option>
+                                                    <option value="récupéré" {{ request('statut') == 'récupéré' ? 'selected' : '' }}>Récupéré</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-3 form-group d-flex align-items-end">
@@ -146,12 +166,16 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <h5>Demand Distribution by Status</h5>
-                                                <canvas id="statusChart" width="400" height="200"></canvas>
+                                                <div style="height: 300px;">
+                                                    <canvas id="statusChart"></canvas>
+                                                </div>
                                             </div>
-
+                                        
                                             <div class="col-md-6">
-                                                <h5>Average Processing Time (Days)</h5>
-                                                <canvas id="processingTimeChart" width="400" height="200"></canvas>
+                                                <h5>Average Processing Time (heures)</h5>
+                                                <div style="height: 300px;">
+                                                    <canvas id="processingTimeChart"></canvas>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -173,13 +197,16 @@
                                                         <th>ID</th>
                                                         <th>Document</th>
                                                         <th>Requester</th>
+                                                        <th>Responsable</th>
+                                                        <th>Archiviste</th>
+                                                        
                                                         <th>Submission Date</th>
                                                         <th>Responsible Validation</th>
-                                                        <th>Responsible Delay</th>
+                                                        <th>Responsible Delay h</th>
                                                         <th>Archivist Validation</th>
-                                                        <th>Archivist Delay</th>
+                                                        <th>Archivist Delay h</th>
                                                         <th>Retrieval</th>
-                                                        <th>Total Time</th>
+                                                        <th>Total Time h</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -191,21 +218,23 @@
                                                             $dateValidationArchiviste = $demande->dateValidationArchiviste ? \Carbon\Carbon::parse($demande->dateValidationArchiviste) : null;
                                                             $dateRecuperation = $demande->dateRecuperation ? \Carbon\Carbon::parse($demande->dateRecuperation) : null;
 
-                                                            $delaiResponsable = $dateValidationResponsable ? $dateSoumission->diffInDays($dateValidationResponsable) : null;
-                                                            $delaiArchiviste = $dateValidationArchiviste ? ($dateValidationResponsable ? $dateValidationResponsable->diffInDays($dateValidationArchiviste) : null) : null;
-                                                            $tempsTotalTraitement = $dateRecuperation ? $dateSoumission->diffInDays($dateRecuperation) : null;
+                                                            $delaiResponsable = $dateValidationResponsable ? $dateSoumission->diffInHours($dateValidationResponsable) : null;
+                                                            $delaiArchiviste = $dateValidationArchiviste ? ($dateValidationResponsable ? $dateValidationResponsable->diffInHours($dateValidationArchiviste) : null) : null;
+                                                            $tempsTotalTraitement = $dateRecuperation ? $dateSoumission->diffInHours($dateRecuperation) : null;
                                                         @endphp
                                                         <tr>
                                                             <td>{{ $demande->idDemande }}</td>
                                                             <td>{{ $demande->document->titre }}</td>
                                                             <td>{{ $demande->utilisateur->nom }}</td>
+                                                            <td>{{ $demande->responsable->nom }}</td>
+                                                            <td>{{ $demande->archiviste?->nom ?? '-' }}</td>
                                                             <td>{{ $demande->dateSoumission }}</td>
                                                             <td>{{ (new DateTime($demande->dateValidationResponsable) ) ? (new DateTime($demande->dateValidationResponsable) )->format('Y-m-d H:i:s') : 'Pending' }}</td>
-                                                            <td>{{ $delaiResponsable !== null ? $delaiResponsable . ' days' : '-' }}</td>
+                                                            <td>{{ $delaiResponsable !== null ? $delaiResponsable . ' H' : '-' }}</td>
                                                             <td>{{ (new DateTime($demande->dateValidationArchiviste) ) ? (new DateTime($demande->dateValidationArchiviste) )->format('Y-m-d H:i:s') : 'Pending' }}</td>
-                                                            <td>{{ $delaiArchiviste !== null ? $delaiArchiviste . ' days' : '-' }}</td>
+                                                            <td>{{ $delaiArchiviste !== null ? $delaiArchiviste . ' H' : '-' }}</td>
                                                             <td>{{ (new DateTime($demande->dateRecuperation) ) ? (new DateTime($demande->dateRecuperation) )->format('Y-m-d H:i:s') : 'Pending' }}</td>
-                                                            <td>{{ $tempsTotalTraitement !== null ? $tempsTotalTraitement . ' days' : '-' }}</td>
+                                                            <td>{{ $tempsTotalTraitement !== null ? $tempsTotalTraitement . ' hours' : '-' }}</td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
@@ -239,51 +268,62 @@
                                             </thead>
                                             <tbody>
                                                 @foreach($demandes ?? [] as $demande)
+                                                @php
+                                                    // Calculate processing times
+                                                    $dateSoumission = \Carbon\Carbon::parse($demande->dateSoumission);
+                                                    $dateValidationResponsable = $demande->dateValidationResponsable ? \Carbon\Carbon::parse($demande->dateValidationResponsable) : null;
+                                                    $dateValidationArchiviste = $demande->dateValidationArchiviste ? \Carbon\Carbon::parse($demande->dateValidationArchiviste) : null;
+                                                    $dateRecuperation = $demande->dateRecuperation ? \Carbon\Carbon::parse($demande->dateRecuperation) : null;
+
+                                                    $delaiResponsable = $dateValidationResponsable ? $dateSoumission->diffInHours($dateValidationResponsable) : null;
+                                                    $delaiArchiviste = $dateValidationArchiviste ? ($dateValidationResponsable ? $dateValidationResponsable->diffInHours($dateValidationArchiviste) : null) : null;
+                                                    $tempsTotalTraitement = $dateRecuperation ? $dateSoumission->diffInHours($dateRecuperation) : null;
+                                                @endphp
                                                 <tr>
                                                     <td>{{ $demande->idDemande }}</td>
                                                     <td>{{ $demande->document->titre }}</td>
                                                     <td>{{ $demande->utilisateur->nom }}</td>
                                                     <td>{{ $demande->dateSoumission }}</td>
-                                                    <td>{{ $demande->delaiTraitement ?? '0' }} jours</td>
+                                                    <td>{{  $delaiResponsable !== null ? $delaiResponsable . ' H' : '-' }} </td>
                                                     <td>
-                                                        @if ($demande->statut === 'en_attente')
-                                                        <div class="btn-group" role="group">
-                                                            <form action="{{ route('demandes.approve.responsable', $demande->idDemande) }}" method="POST" style="display: inline;">
-                                                                @csrf
-                                                                <button type="submit" class="btn btn-sm btn-success">Approuver</button>
-                                                            </form>
-                                                            
-                                                            <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#rejectModal{{ $demande->idDemande }}">
-                                                                Rejeter
-                                                            </button>
-                                                        </div>
+                                                        <!-- Replace the existing reject button and modal in the responsable section -->
+                                                    @if ($demande->statut === 'en_attente')
+                                                    <div class="btn-group" role="group">
+                                                        <form action="{{ route('demandes.approve.responsable', $demande->idDemande) }}" method="POST" style="display: inline;">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-success">Approuver</button>
+                                                        </form>
                                                         
-                                                        <!-- Rejection Modal -->
-                                                        <div class="modal fade" id="rejectModal{{ $demande->idDemande }}" tabindex="-1" role="dialog">
-                                                            <div class="modal-dialog" role="document">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title">Rejeter la demande</h5>
-                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                        </button>
-                                                                    </div>
-                                                                    <form action="{{ route('demandes.reject.responsable', $demande->idDemande) }}" method="POST">
-                                                                        @csrf
-                                                                        <div class="modal-body">
-                                                                            <div class="form-group">
-                                                                                <label for="commentaire">Raison du rejet:</label>
-                                                                                <textarea class="form-control" id="commentaire" name="commentaire" required></textarea>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="modal-footer">
-                                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                                                                            <button type="submit" class="btn btn-danger">Confirmer le rejet</button>
-                                                                        </div>
-                                                                    </form>
+                                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $demande->idDemande }}">
+                                                            Rejeter
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- Rejection Modal -->
+                                                    <div class="modal fade" id="rejectModal{{ $demande->idDemande }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $demande->idDemande }}" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="rejectModalLabel{{ $demande->idDemande }}">Rejeter la demande</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                 </div>
+                                                                <form action="{{ route('demandes.reject.responsable', $demande->idDemande) }}" method="POST">
+                                                                    @csrf
+                                                                    <div class="modal-body">
+                                                                        <div class="form-group">
+                                                                            <label for="commentaire{{ $demande->idDemande }}">Raison du rejet:</label>
+                                                                            <textarea class="form-control" id="commentaire{{ $demande->idDemande }}" name="commentaire" required></textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                                        <button type="submit" class="btn btn-danger">Confirmer le rejet</button>
+                                                                    </div>
+                                                                </form>
                                                             </div>
                                                         </div>
+                                                    </div>
+
                                                     @else
                                                         @switch($demande->statut)
                                                             @case('approuvé_responsable')
@@ -291,6 +331,15 @@
                                                                 @break
                                                             @case('refusé_responsable')
                                                                 <span class="badge status-{{ $demande->statut }}">Refusé par responsable</span>
+                                                                @break
+                                                            @case('récupéré')
+                                                                <span class="badge status-{{ $demande->statut }}">terminé</span>
+                                                                @break
+                                                            @case('approuvé_archiviste')
+                                                                <span class="badge status-{{ $demande->statut }}">approuvé par archiviste</span>
+                                                                @break
+                                                            @case('refusé_archiviste')
+                                                                <span class="badge status-{{ $demande->statut }}">Refusé par archiviste</span>
                                                                 @break
                                                         @endswitch
                                                     @endif
@@ -329,12 +378,23 @@
                                             </thead>
                                             <tbody>
                                                 @foreach($demandes ?? [] as $demande)
+                                                @php
+                                                    // Calculate processing times
+                                                    $dateSoumission = \Carbon\Carbon::parse($demande->dateSoumission);
+                                                    $dateValidationResponsable = $demande->dateValidationResponsable ? \Carbon\Carbon::parse($demande->dateValidationResponsable) : null;
+                                                    $dateValidationArchiviste = $demande->dateValidationArchiviste ? \Carbon\Carbon::parse($demande->dateValidationArchiviste) : null;
+                                                    $dateRecuperation = $demande->dateRecuperation ? \Carbon\Carbon::parse($demande->dateRecuperation) : null;
+
+                                                    $delaiResponsable = $dateValidationResponsable ? $dateSoumission->diffInHours($dateValidationResponsable) : null;
+                                                    $delaiArchiviste = $dateValidationArchiviste ? ($dateValidationResponsable ? $dateValidationResponsable->diffInHours($dateValidationArchiviste) : null) : null;
+                                                    $tempsTotalTraitement = $dateRecuperation ? $dateSoumission->diffInHours($dateRecuperation) : null;
+                                                @endphp
                                                 <tr>
                                                     <td>{{ $demande->idDemande }}</td>
                                                     <td>{{ $demande->document->titre }}</td>
                                                     <td>{{ $demande->utilisateur->nom }}</td>
                                                     <td>{{ $demande->dateValidationResponsable }}</td>
-                                                    <td>{{ $demande->delaiTraitement ?? '0' }} jours</td>
+                                                    <td>{{ $delaiArchiviste !== null ? $delaiArchiviste . ' H' : '-'  }} </td>
                                                     <td>
                                                         @if ($demande->statut === 'approuvé_responsable')
                                                         <div class="btn-group" role="group">
@@ -381,6 +441,10 @@
                                                             @case('refusé_archiviste')
                                                                 <span class="badge status-{{ $demande->statut }}">Refusé par archiviste</span>
                                                                 @break
+                                                            @case('récupéré')
+                                                                <span class="badge status-{{ $demande->statut }}">Terminé</span>
+                                                                @break
+                                                            
                                                         @endswitch
                                                         @endif
 
@@ -425,15 +489,15 @@
                                                     <td>{{ $demande->dateSoumission }}</td>
                                                     <td>
                                                         @if($demande->statut == 'en_attente')
-                                                            <span class="badge badge status-{{ $demande->statut }}">Soumise</span>
+                                                            <span class="badge status-en_attente">Soumise</span>
                                                         @elseif($demande->statut == 'approuvé_responsable')
-                                                            <span class="badge badge status-{{ $demande->statut }}">Validée par responsable</span>
+                                                            <span class="badge status-approuvé_responsable">Validée par responsable</span>
                                                         @elseif($demande->statut == 'approuvé_archiviste')
-                                                            <span class="badge badge status-{{ $demande->statut }}">Prête pour récupération</span>
+                                                            <span class="badge status-approuvé_archiviste">Prête pour récupération</span>
                                                         @elseif($demande->statut == 'refusé_responsable||refusé_archiviste')
                                                             <span class="badge badge status-{{ $demande->statut }}">Rejetée</span>
                                                         @elseif($demande->statut == 'récupéré')
-                                                            <span class="badge badge status-{{ $demande->statut }}">récupéré</span>
+                                                            <span class="badge badge status-{{ $demande->statut }}">Terminé</span>
                                                         @endif
                                                     </td>
                                                     <td>{{ $demande->updated_at }}</td>
@@ -486,26 +550,29 @@ document.addEventListener('DOMContentLoaded', function() {
         var statusChart = new Chart(statusCtx, {
             type: 'pie',
             data: {
-                labels: ['Soumise', 'Validée Responsable', 'Validée Archiviste', 'Rejetée', 'Terminée'],
-                datasets: [{
-                    data: [
-                        {{ $stats['statusDistribution']['soumise'] ?? 0 }},
-                        {{ $stats['statusDistribution']['validee_responsable'] ?? 0 }},
-                        {{ $stats['statusDistribution']['validee_archiviste'] ?? 0 }},
-                        {{ $stats['statusDistribution']['rejetee'] ?? 0 }},
-                        {{ $stats['statusDistribution']['terminee'] ?? 0 }}
-                    ],
-                    backgroundColor: [
-                        '#17a2b8', // info
-                        '#007bff', // primary
-                        '#28a745', // success
-                        '#dc3545', // danger
-                        '#6c757d'  // secondary
-                    ]
-                }]
+                labels: ['En attente', 'Approuvé Responsable', 'Refusé Responsable', 'Approuvé Archiviste', 'Refusé Archiviste', 'Récupéré'],
+                    datasets: [{
+                        data: [
+                            {{ isset($stats['statusDistribution']['en_attente']) ? $stats['statusDistribution']['en_attente'] : 0 }},
+                            {{ isset($stats['statusDistribution']['approuvé_responsable']) ? $stats['statusDistribution']['approuvé_responsable'] : 0 }},
+                            {{ isset($stats['statusDistribution']['refusé_responsable']) ? $stats['statusDistribution']['refusé_responsable'] : 0 }},
+                            {{ isset($stats['statusDistribution']['approuvé_archiviste']) ? $stats['statusDistribution']['approuvé_archiviste'] : 0 }},
+                            {{ isset($stats['statusDistribution']['refusé_archiviste']) ? $stats['statusDistribution']['refusé_archiviste'] : 0 }},
+                            {{ isset($stats['statusDistribution']['récupéré']) ? $stats['statusDistribution']['récupéré'] : 0 }}
+                        ],
+                        backgroundColor: [
+                            '#17a2b8', // En attente
+                            '#007bff', // Approuvé Responsable
+                            '#dc3545', // Refusé Responsable
+                            '#28a745', // Approuvé Archiviste
+                            '#fd7e14', // Refusé Archiviste
+                            '#6c757d'  // Récupéré
+                        ]
+                    }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: true,
                 legend: {
                     position: 'bottom'
                 }
@@ -514,35 +581,53 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Processing time chart
         var timeCtx = document.getElementById('processingTimeChart').getContext('2d');
+        var processingHours = {{ isset($stats['avg_processing_time']) ? $stats['avg_processing_time'] : 0 }};
+        var processingDays = processingHours / 24;
+
         var timeChart = new Chart(timeCtx, {
             type: 'bar',
             data: {
-                labels: ['Responsable', 'Archiviste', 'Total'],
+                labels: ['Temps de traitement moyen'],
                 datasets: [{
-                    label: 'Temps moyen (jours)',
-                    data: [
-                        {{ $stats['avgProcessingTimes']['responsable'] ?? 0 }},
-                        {{ $stats['avgProcessingTimes']['archiviste'] ?? 0 }},
-                        {{ $stats['avgProcessingTimes']['total'] ?? 0 }}
-                    ],
-                    backgroundColor: [
-                        '#007bff',
-                        '#28a745',
-                        '#17a2b8'
-                    ]
+                    label: 'Jours',
+                    data: [processingDays],
+                    backgroundColor: ['#17a2b8']
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                legend: { display: false },
                 scales: {
                     yAxes: [{
-                        ticks: {
-                            beginAtZero: true
+                        ticks: { 
+                            beginAtZero: true,
+                            callback: function(value) {
+                                return value.toFixed(1) + ' j';
+                            }
                         }
                     }]
                 },
-                responsive: true,
-                legend: {
-                    display: false
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            var hours = tooltipItem.yLabel * 24;
+                            return hours.toFixed(1) + ' heures (' + tooltipItem.yLabel.toFixed(1) + ' jours)';
+                        }
+                    }
+                },
+                animation: {
+                    onComplete: function() {
+                        if (processingHours == 0) {
+                            // Display a message when there's no data
+                            var ctx = this.chart.ctx;
+                            ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, 'normal', Chart.defaults.global.defaultFontFamily);
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillStyle = '#666';
+                            ctx.fillText('Aucune donnée disponible', this.chart.width / 2, this.chart.height / 2);
+                        }
+                    }
                 }
             }
         });

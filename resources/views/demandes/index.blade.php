@@ -62,6 +62,79 @@
                                     <a href="{{ route('demandes.show', $demande->idDemande) }}" class="btn btn-sm btn-info">
                                         <i class="fas fa-eye"></i> Voir
                                     </a>
+                                    @if (Auth::user()->role == 'responsable' && $demande->statut == 'en_attente')
+                                        <div class="btn-group" role="group">
+                                            <form action="{{ route('demandes.approve.responsable', $demande->idDemande) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success">Approuver</button>
+                                            </form>
+                                            
+                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $demande->idDemande }}">
+                                                <i class="fas fa-times"></i> {{ __('Refuser') }}
+                                            </button>
+                                            
+                                        </div>
+                                        
+                                        <!-- Rejection Modal -->
+                                        <div class="modal fade" id="rejectModal{{ $demande->idDemande }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $demande->idDemande }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form method="POST" action="{{ route('demandes.reject.responsable', $demande->idDemande) }}">
+                                                        @csrf
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="rejectModalLabel{{ $demande->idDemande }}">{{ __('Refuser la demande') }}</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label for="commentaire{{ $demande->idDemande }}" class="form-label">{{ __('Motif du refus') }}</label>
+                                                                <textarea class="form-control" id="commentaire{{ $demande->idDemande }}" name="commentaire" rows="3" required></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
+                                                            <button type="submit" class="btn btn-danger">{{ __('Confirmer le refus') }}</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @elseif (Auth::user()->role == 'archiviste' && $demande->statut == 'approuvé_responsable')
+                                        <form action="{{ route('demandes.approve.archiviste', $demande->idDemande) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success">Approuver</button>
+                                        </form>
+                                        
+                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $demande->idDemande }}">
+                                            <i class="fas fa-times"></i> {{ __('Rejeter') }}
+                                        </button>
+                                        
+                                        <!-- Rejection Modal -->
+                                        <div class="modal fade" id="rejectModal{{ $demande->idDemande }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $demande->idDemande }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form method="POST" action="{{ route('demandes.reject.archiviste', $demande->idDemande) }}">
+                                                        @csrf
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="rejectModalLabel{{ $demande->idDemande }}">{{ __('Rejeter la demande') }}</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label for="commentaire{{ $demande->idDemande }}" class="form-label">{{ __('Motif du rejet') }}</label>
+                                                                <textarea class="form-control" id="commentaire{{ $demande->idDemande }}" name="commentaire" rows="3" required></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
+                                                            <button type="submit" class="btn btn-danger">{{ __('Confirmer le rejet') }}</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
                                 </td>
                             </tr>
                         @endforeach
@@ -78,5 +151,6 @@
             </div>
         @endif
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </div>
 @endsection

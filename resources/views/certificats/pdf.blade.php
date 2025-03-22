@@ -4,68 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificat de prêt N° {{ $certificat->idCertificat }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-        }
-        .section {
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .row {
-            display: flex;
-            margin-bottom: 10px;
-        }
-        .col {
-            flex: 1;
-        }
-        .label {
-            font-weight: bold;
-        }
-        .footer {
-            margin-top: 50px;
-            text-align: center;
-            font-size: 12px;
-            color: #777;
-        }
-        .signature-box {
-            margin-top: 40px;
-            border: 1px solid #333;
-            padding: 15px;
-        }
-        .signature-title {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 60px;
-        }
-        .signature-line {
-            margin-top: 10px;
-            border-top: 1px solid #333;
-            width: 200px;
-            display: inline-block;
-            text-align: center;
-        }
-    </style>
+    
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.3;
+        color: #333;
+        font-size: 11px;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 15px;
+    }
+    .header {
+        text-align: center;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #333;
+        padding-bottom: 5px;
+    }
+    .header h1 {
+        margin: 0;
+        font-size: 16px;
+    }
+    .header h3 {
+        margin: 5px 0;
+        font-size: 14px;
+    }
+    .section {
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #ddd;
+    }
+    .section-title {
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+    }
+    .row {
+        display: flex;
+        margin-bottom: 5px;
+    }
+    .col {
+        flex: 1;
+    }
+    .label {
+        font-weight: bold;
+    }
+    .footer {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 10px;
+        color: #777;
+    }
+    .signature-box {
+        margin-top: 15px;
+        border: 1px solid #333;
+        padding: 10px;
+    }
+    .signature-title {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 30px;
+        font-size: 11px;
+    }
+    .signature-line {
+        margin-top: 5px;
+        border-top: 1px solid #333;
+        width: 150px;
+        display: inline-block;
+        text-align: center;
+        font-size: 10px;
+    }
+</style>
 </head>
 <body>
     <div class="container">
@@ -76,15 +88,15 @@
         </div>
 
         <div class="section">
-            <div class="section-title">INFORMATION SUR L'UTILISATEUR</div>
+            <div class="section-title">INFORMATION SUR L'UTILISATEUR ET LE DOCUMENT</div>
             <div class="row">
                 <div class="col">
-                    <div><span class="label">Nom:</span> {{ $certificat->utilisateur->nom }}</div>
-                    <div><span class="label">Email:</span> {{ $certificat->utilisateur->email }}</div>
+                    <div><span class="label">Utilisateur:</span> {{ $certificat->utilisateur->nom }}</div>
+                    <div><span class="label">Fonction:</span> {{ $certificat->utilisateur->fonction ?: 'Non spécifié' }}</div>
                 </div>
                 <div class="col">
-                    <div><span class="label">Fonction:</span> {{ $certificat->utilisateur->fonction ?: 'Non spécifié' }}</div>
-                    <div><span class="label">Service:</span> {{ $certificat->utilisateur->service ?: 'Non spécifié' }}</div>
+                    <div><span class="label">Document:</span> {{ $certificat->document->titre }}</div>
+                    <div><span class="label">Type:</span> {{ $certificat->document->type }}</div>
                 </div>
             </div>
         </div>
