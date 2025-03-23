@@ -4,7 +4,7 @@
     <div class="card-header">Liste des Utilisateurs</div>
     <div class="card-body">
         <a href="{{ route('users.create') }}" class="btn btn-primary">Ajouter un Utilisateur</a>
-        <table class="table mt-3">
+        <table class="table table-striped table-hover mt-3">
             <thead>
                 <tr>
                     <th>ID</th>

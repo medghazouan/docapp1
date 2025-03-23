@@ -460,3 +460,260 @@ body {
     color: #a49672;
 
 }
+/*notification home*/
+.custom-alert {
+    background-color: rgba(164, 150, 114, 0.2); /* #a49672 with 20% opacity */
+    border-color: rgba(164, 150, 114, 0.3);
+    color: #6c6757; /* Slightly darker text for better readability */
+}
+
+.custom-alert .alert-link {
+    color: #a49672;
+    font-weight: 500;
+}
+/*next & prev*/
+
+.pagination {
+    margin-bottom: 0;
+}
+
+.pagination .page-item .page-link {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.875rem;
+    line-height: 1.2;
+    color: #555;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.pagination .page-item .page-link:hover {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #0056b3;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #adb5bd;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+}
+/* Professional Table Styling */
+.table-responsive {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.table {
+    margin-bottom: 0;
+    width: 100%;
+    color: var(--secondary-color);
+}
+
+/* Table Header */
+.table thead th {
+    background-color: rgba(164, 150, 114, 0.1);
+    color: var(--primary-color);
+    font-weight: 600;
+    border-bottom: 2px solid var(--primary-color);
+    padding: 1rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Table Body */
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(164, 150, 114, 0.2);
+    color: var(--secondary-color);
+}
+
+/* Striped Rows */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(164, 150, 114, 0.05);
+}
+
+/* Hover Effect */
+.table-hover tbody tr:hover {
+    background-color: rgba(164, 150, 114, 0.1);
+    transition: var(--transition);
+}
+
+/* Status Badges in Table */
+.table .badge {
+    padding: 0.5em 1em;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 30px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Action Buttons in Table */
+.table .btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    margin: 0 0.25rem;
+    border-radius: 4px;
+}
+
+/* Status Badge Colors */
+.status-en_attente {
+    background-color: rgba(164, 150, 114, 0.2);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.status-approuvé_responsable {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    border: 1px solid #28a745;
+}
+
+.status-refusé_responsable {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.status-approuvé_archiviste {
+    background-color: rgba(23, 162, 184, 0.2);
+    color: #17a2b8;
+    border: 1px solid #17a2b8;
+}
+
+.status-refusé_archiviste {
+    background-color: rgba(253, 126, 20, 0.2);
+    color: #fd7e14;
+    border: 1px solid #fd7e14;
+}
+
+.status-récupéré {
+    background-color: rgba(108, 117, 125, 0.2);
+    color: #6c757d;
+    border: 1px solid #6c757d;
+}
+
+/* Table Card Styling */
+.card .table {
+    margin-top: -1px;
+}
+
+.card .card-header {
+    background-color: var(--white);
+    border-bottom: 2px solid var(--primary-color);
+    padding: 1rem 1.5rem;
+}
+
+.card .card-header h4 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin: 0;
+}
+/* ADD: Professional Button Styles */
+.btn {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Primary Button */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: var(--white);
+}
+
+/* Success Button */
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: var(--white);
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+/* Danger Button */
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Info Button */
+.btn-info {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-info:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+/* Secondary Button */
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+/* Small Button Variant */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Button Group Styling */
+.btn-group {
+    display: inline-flex;
+    gap: 0.5rem;
+}
+
+/* Button with Icon */
+.btn i {
+    font-size: 0.875rem;
+}
+
+/* Modal Buttons */
+.modal .btn {
+    font-weight: 500;
+    min-width: 100px;
+}

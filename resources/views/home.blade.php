@@ -14,7 +14,7 @@
                         </div>
                     @endif
                     @if($unreadNotifications > 0)
-                        <div class="alert alert-info mt-4">
+                        <div class="alert custom-alert mt-4">
                             <i class="fas fa-bell"></i> Vous avez {{ $unreadNotifications }} notification(s) non lue(s).
                             <a href="{{ route('notifications.index') }}" class="alert-link">Voir les notifications</a>
                         </div>
@@ -271,7 +271,7 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="table-responsive">
-                                            <table class="table table-striped">
+                                            <table class="table table-striped table-hover">
                                                 <thead>
                                                     <tr>
                                                         <th>ID</th>
@@ -279,7 +279,7 @@
                                                         <th>Requester</th>
                                                         <th>Responsable</th>
                                                         <th>Archiviste</th>
-                                                        
+                                                        <th>Statut</th>
                                                         <th>Submission Date</th>
                                                         <th>Responsible Validation</th>
                                                         <th>Responsible Delay h</th>
@@ -299,7 +299,7 @@
                                                             $dateRecuperation = $demande->dateRecuperation ? \Carbon\Carbon::parse($demande->dateRecuperation) : null;
 
                                                             $delaiResponsable = $dateValidationResponsable ? $dateSoumission->diffInHours($dateValidationResponsable) : null;
-                                                            $delaiArchiviste = $dateValidationArchiviste ? ($dateValidationResponsable ? $dateValidationResponsable->diffInHours($dateValidationArchiviste) : null) : null;
+                                                            $delaiArchiviste = ($dateValidationArchiviste && $dateValidationResponsable) ?$dateValidationResponsable->diffInHours($dateValidationArchiviste) : null;
                                                             $tempsTotalTraitement = $dateRecuperation ? $dateSoumission->diffInHours($dateRecuperation) : null;
                                                         @endphp
                                                         <tr>
@@ -308,6 +308,30 @@
                                                             <td>{{ $demande->utilisateur->nom }}</td>
                                                             <td>{{ $demande->responsable->nom }}</td>
                                                             <td>{{ $demande->archiviste?->nom ?? '-' }}</td>
+                                                            <td>
+                                                                <span class="badge status-{{ $demande->statut }}">
+                                                                    @switch($demande->statut)
+                                                                        @case('en_attente')
+                                                                            En attente
+                                                                            @break
+                                                                        @case('approuvé_responsable')
+                                                                            Approuvé par responsable
+                                                                            @break
+                                                                        @case('refusé_responsable')
+                                                                            Refusé par responsable
+                                                                            @break
+                                                                        @case('approuvé_archiviste')
+                                                                            Approuvé par archiviste
+                                                                            @break
+                                                                        @case('refusé_archiviste')
+                                                                            Refusé par archiviste
+                                                                            @break
+                                                                        @case('récupéré')
+                                                                            Récupéré
+                                                                            @break
+                                                                    @endswitch
+                                                                </span>
+                                                            </td>
                                                             <td>{{ $demande->dateSoumission }}</td>
                                                             <td>{{ (new DateTime($demande->dateValidationResponsable) ) ? (new DateTime($demande->dateValidationResponsable) )->format('Y-m-d H:i:s') : 'Pending' }}</td>
                                                             <td>{{ $delaiResponsable !== null ? $delaiResponsable . ' H' : '-' }}</td>
@@ -335,7 +359,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table class="table table-striped">
+                                        <table class="table table-striped table-hover">
                                             <thead>
                                                 <tr>
                                                     <th>ID</th>
@@ -369,41 +393,40 @@
                                                         <!-- Replace the existing reject button and modal in the responsable section -->
                                                     @if ($demande->statut === 'en_attente')
                                                     <div class="btn-group" role="group">
-                                                        <form action="{{ route('demandes.approve.responsable', $demande->idDemande) }}" method="POST" style="display: inline;">
+                                                        <form action="{{ route('demandes.approve.responsable', $demande->idDemande) }}" method="POST" class="d-inline">
                                                             @csrf
-                                                            <button type="submit" class="btn btn-sm btn-success">Approuver</button>
+                                                            <button type="submit" class="btn btn-sm btn-success">
+                                                                <i class="fas fa-check"></i> Approuver
+                                                            </button>
                                                         </form>
-                                                        
                                                         <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $demande->idDemande }}">
-                                                            Rejeter
+                                                            <i class="fas fa-times"></i> Refuser
                                                         </button>
                                                     </div>
-
                                                     <!-- Rejection Modal -->
                                                     <div class="modal fade" id="rejectModal{{ $demande->idDemande }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $demande->idDemande }}" aria-hidden="true">
                                                         <div class="modal-dialog">
                                                             <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title" id="rejectModalLabel{{ $demande->idDemande }}">Rejeter la demande</h5>
-                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                </div>
-                                                                <form action="{{ route('demandes.reject.responsable', $demande->idDemande) }}" method="POST">
+                                                                <form method="POST" action="{{ route('demandes.reject.responsable', $demande->idDemande) }}">
                                                                     @csrf
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="rejectModalLabel{{ $demande->idDemande }}">{{ __('Refuser la demande') }}</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
                                                                     <div class="modal-body">
-                                                                        <div class="form-group">
-                                                                            <label for="commentaire{{ $demande->idDemande }}">Raison du rejet:</label>
-                                                                            <textarea class="form-control" id="commentaire{{ $demande->idDemande }}" name="commentaire" required></textarea>
+                                                                        <div class="mb-3">
+                                                                            <label for="commentaire{{ $demande->idDemande }}" class="form-label">{{ __('Motif du refus') }}</label>
+                                                                            <textarea class="form-control" id="commentaire{{ $demande->idDemande }}" name="commentaire" rows="3" required></textarea>
                                                                         </div>
                                                                     </div>
                                                                     <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                                                        <button type="submit" class="btn btn-danger">Confirmer le rejet</button>
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
+                                                                        <button type="submit" class="btn btn-danger">{{ __('Confirmer le refus') }}</button>
                                                                     </div>
                                                                 </form>
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                     @else
                                                         @switch($demande->statut)
                                                             @case('approuvé_responsable')
@@ -445,7 +468,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table class="table table-striped">
+                                        <table class="table table-striped table-hover">
                                             <thead>
                                                 <tr>
                                                     <th>ID</th>
@@ -480,33 +503,71 @@
                                                         <div class="btn-group" role="group">
                                                             <form action="{{ route('demandes.approve.archiviste', $demande->idDemande) }}" method="POST" style="display: inline;">
                                                                 @csrf
-                                                                <button type="submit" class="btn btn-sm btn-success">Approuver</button>
+                                                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#approveModal{{ $demande->idDemande }}">
+                                                                    <i class="fas fa-check"></i> Approuver
+                                                                </button>
                                                             </form>
                                                             
                                                             <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $demande->idDemande }}">
-                                                                Rejeter
+                                                                <i class="fas fa-times"></i> Rejeter
                                                             </button>
                                                         </div>
-                                                        
-                                                        <!-- Rejection Modal -->
-                                                        <div class="modal fade" id="rejectModal{{ $demande->idDemande }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $demande->idDemande }}" aria-hidden="true">
+                                                        <div class="modal fade" id="approveModal{{ $demande->idDemande }}" tabindex="-1" aria-labelledby="approveModalLabel{{ $demande->idDemande }}" aria-hidden="true">
                                                             <div class="modal-dialog">
                                                                 <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title" id="rejectModalLabel{{ $demande->idDemande }}">Rejeter la demande</h5>
-                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                    </div>
-                                                                    <form action="{{ route('demandes.reject.archiviste', $demande->idDemande) }}" method="POST">
+                                                                    <form method="POST" action="{{ route('demandes.approve.archiviste', $demande->idDemande) }}">
                                                                         @csrf
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title" id="approveModalLabel{{ $demande->idDemande }}">Fixer la date de récupération</h5>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                        </div>
                                                                         <div class="modal-body">
-                                                                            <div class="form-group">
-                                                                                <label for="commentaire">Raison du rejet:</label>
-                                                                                <textarea class="form-control" id="commentaire" name="commentaire" required></textarea>
+                                                                            <div class="mb-3">
+                                                                                <label for="dateRecuperation" class="form-label">Date de récupération *</label>
+                                                                                <input type="datetime-local" 
+                                                                                    class="form-control" 
+                                                                                    id="dateRecuperation" 
+                                                                                    name="dateRecuperation" 
+                                                                                    min="{{ now()->format('Y-m-d\TH:i') }}"
+                                                                                    required>
                                                                             </div>
                                                                         </div>
                                                                         <div class="modal-footer">
                                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                                                            <button type="submit" class="btn btn-danger">Confirmer le rejet</button>
+                                                                            <button type="submit" class="btn btn-success">Valider l'approbation</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <!-- MODIFY: Add rejection modal for archivist -->
+                                                        <div class="modal fade" id="rejectModal{{ $demande->idDemande }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $demande->idDemande }}" aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <form method="POST" action="{{ route('demandes.reject.archiviste', $demande->idDemande) }}">
+                                                                        @csrf
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title" id="rejectModalLabel{{ $demande->idDemande }}">{{ __('Refuser la demande') }}</h5>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <div class="mb-3">
+                                                                                <label for="commentaire{{ $demande->idDemande }}" class="form-label">{{ __('Motif du refus') }}</label>
+                                                                                <textarea class="form-control " 
+                                                                                        id="commentaire{{ $demande->idDemande }}" 
+                                                                                        name="commentaire" 
+                                                                                        rows="3" 
+                                                                                        required></textarea>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                                <i class="fas fa-times"></i> {{ __('Annuler') }}
+                                                                            </button>
+                                                                            <button type="submit" class="btn btn-danger">
+                                                                                <i class="fas fa-check"></i> {{ __('Confirmer le refus') }}
+                                                                            </button>
                                                                         </div>
                                                                     </form>
                                                                 </div>
@@ -550,7 +611,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
-                                        <table class="table table-striped">
+                                        <table class="table table-striped table-hover">
                                             <thead>
                                                 <tr>
                                                     <th>ID</th>
@@ -642,35 +703,90 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'pie',
             data: {
                 labels: ['En attente', 'Approuvé Responsable', 'Refusé Responsable', 'Approuvé Archiviste', 'Refusé Archiviste', 'Récupéré'],
-                    datasets: [{
-                        data: [
-                            {{ isset($stats['statusDistribution']['en_attente']) ? $stats['statusDistribution']['en_attente'] : 0 }},
-                            {{ isset($stats['statusDistribution']['approuvé_responsable']) ? $stats['statusDistribution']['approuvé_responsable'] : 0 }},
-                            {{ isset($stats['statusDistribution']['refusé_responsable']) ? $stats['statusDistribution']['refusé_responsable'] : 0 }},
-                            {{ isset($stats['statusDistribution']['approuvé_archiviste']) ? $stats['statusDistribution']['approuvé_archiviste'] : 0 }},
-                            {{ isset($stats['statusDistribution']['refusé_archiviste']) ? $stats['statusDistribution']['refusé_archiviste'] : 0 }},
-                            {{ isset($stats['statusDistribution']['récupéré']) ? $stats['statusDistribution']['récupéré'] : 0 }}
-                        ],
-                        backgroundColor: [
-                            '#17a2b8', // En attente
-                            '#007bff', // Approuvé Responsable
-                            '#dc3545', // Refusé Responsable
-                            '#28a745', // Approuvé Archiviste
-                            '#fd7e14', // Refusé Archiviste
-                            '#6c757d'  // Récupéré
-                        ]
-                    }]
+                datasets: [{
+                    data: [
+                        {{ isset($stats['statusDistribution']['en_attente']) ? $stats['statusDistribution']['en_attente'] : 0 }},
+                        {{ isset($stats['statusDistribution']['approuvé_responsable']) ? $stats['statusDistribution']['approuvé_responsable'] : 0 }},
+                        {{ isset($stats['statusDistribution']['refusé_responsable']) ? $stats['statusDistribution']['refusé_responsable'] : 0 }},
+                        {{ isset($stats['statusDistribution']['approuvé_archiviste']) ? $stats['statusDistribution']['approuvé_archiviste'] : 0 }},
+                        {{ isset($stats['statusDistribution']['refusé_archiviste']) ? $stats['statusDistribution']['refusé_archiviste'] : 0 }},
+                        {{ isset($stats['statusDistribution']['récupéré']) ? $stats['statusDistribution']['récupéré'] : 0 }}
+                    ],
+                    backgroundColor: [
+                        'rgba(164, 150, 114, 0.9)',    // En attente - Primary color
+                        'rgba(138, 125, 94, 0.9)',     // Approuvé Responsable - Primary dark
+                        'rgba(191, 64, 64, 0.9)',      // Refusé Responsable - Professional red
+                        'rgba(73, 155, 94, 0.9)',      // Approuvé Archiviste - Professional green
+                        'rgba(226, 135, 67, 0.9)',     // Refusé Archiviste - Professional orange
+                        'rgba(108, 117, 125, 0.9)'     // Récupéré - Professional grey
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
                 legend: {
-                    position: 'bottom'
+                    position: 'right',
+                    labels: {
+                        fontFamily: "'Nunito', sans-serif",
+                        fontSize: 12,
+                        fontColor: '#171717',
+                        padding: 20,
+                        usePointStyle: true,
+                        generateLabels: function(chart) {
+                            var data = chart.data;
+                            if (data.labels.length && data.datasets.length) {
+                                return data.labels.map(function(label, i) {
+                                    var meta = chart.getDatasetMeta(0);
+                                    var ds = data.datasets[0];
+                                    var arc = meta.data[i];
+                                    var custom = arc && arc.custom || {};
+                                    var value = ds.data[i];
+                                    var percentage = ((value / ds.data.reduce((a, b) => a + b)) * 100).toFixed(1);
+                                    
+                                    return {
+                                        text: label + ' (' + percentage + '%)',
+                                        fillStyle: ds.backgroundColor[i],
+                                        hidden: isNaN(ds.data[i]) || meta.data[i].hidden,
+                                        index: i
+                                    };
+                                });
+                            }
+                            return [];
+                        }
+                    }
+                },
+                tooltips: {
+                    backgroundColor: 'rgba(23, 23, 23, 0.9)',
+                    titleFontFamily: "'Nunito', sans-serif",
+                    bodyFontFamily: "'Nunito', sans-serif",
+                    titleFontSize: 14,
+                    bodyFontSize: 13,
+                    titleFontColor: '#ffffff',
+                    bodyFontColor: '#ffffff',
+                    caretSize: 6,
+                    cornerRadius: 6,
+                    xPadding: 10,
+                    yPadding: 10,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            var dataset = data.datasets[tooltipItem.datasetIndex];
+                            var total = dataset.data.reduce(function(previousValue, currentValue) {
+                                return previousValue + currentValue;
+                            });
+                            var currentValue = dataset.data[tooltipItem.index];
+                            var percentage = ((currentValue/total) * 100).toFixed(1);
+                            return " " + data.labels[tooltipItem.index] + ": " + currentValue + " (" + percentage + "%)";
+                        }
+                    }
                 }
             }
         });
         
-        // Processing time chart
+        // Processing time chart with your theme color
         var timeCtx = document.getElementById('processingTimeChart').getContext('2d');
         var processingHours = {{ isset($stats['avg_processing_time']) ? $stats['avg_processing_time'] : 0 }};
         var processingDays = processingHours / 24;
@@ -682,7 +798,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Jours',
                     data: [processingDays],
-                    backgroundColor: ['#17a2b8']
+                    backgroundColor: ['#a49672'], // Primary color
+                    borderColor: '#8a7d5e',      // Primary dark
+                    borderWidth: 1
                 }]
             },
             options: {
@@ -693,30 +811,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     yAxes: [{
                         ticks: { 
                             beginAtZero: true,
+                            fontColor: '#171717',
                             callback: function(value) {
                                 return value.toFixed(1) + ' j';
                             }
+                        },
+                        gridLines: {
+                            color: 'rgba(164, 150, 114, 0.1)',
+                            zeroLineColor: 'rgba(164, 150, 114, 0.2)'
+                        }
+                    }],
+                    xAxes: [{
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            fontColor: '#171717'
                         }
                     }]
                 },
                 tooltips: {
+                    backgroundColor: '#171717',
+                    titleFontColor: '#ffffff',
+                    bodyFontColor: '#ffffff',
                     callbacks: {
                         label: function(tooltipItem, data) {
                             var hours = tooltipItem.yLabel * 24;
                             return hours.toFixed(1) + ' heures (' + tooltipItem.yLabel.toFixed(1) + ' jours)';
-                        }
-                    }
-                },
-                animation: {
-                    onComplete: function() {
-                        if (processingHours == 0) {
-                            // Display a message when there's no data
-                            var ctx = this.chart.ctx;
-                            ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, 'normal', Chart.defaults.global.defaultFontFamily);
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillStyle = '#666';
-                            ctx.fillText('Aucune donnée disponible', this.chart.width / 2, this.chart.height / 2);
                         }
                     }
                 }

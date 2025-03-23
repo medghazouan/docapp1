@@ -88,7 +88,7 @@ class DemandeDocumentController extends Controller
         ]);
         
         // Envoyer un email au responsable
-       // Mail::to($responsable->email)->send(new DemandeDocumentNotification($demande));
+        //Mail::to($responsable->email)->send(new DemandeDocumentNotification($demande));
         
         return redirect()->route('demandes.index')->with('success', 'Demande soumise avec succès.');
     }
@@ -175,7 +175,9 @@ class DemandeDocumentController extends Controller
     // Mise à jour complète
     $demande->update([
         'statut' => 'approuvé_archiviste',
-        'dateRecuperation' => $validated['dateRecuperation']
+        'dateRecuperation' => $validated['dateRecuperation'],
+        'dateValidationArchiviste' => now()
+
     ]);
 
     // Création du certificat avec gestion d'erreur

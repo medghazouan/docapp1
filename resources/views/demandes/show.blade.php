@@ -112,7 +112,13 @@
                     </tr>
                     <tr>
                         <th>{{ __('Validation responsable') }}</th>
-                        <td>{{ (new DateTime($demande->dateValidationResponsable))  ? ( new DateTime($demande->dateValidationResponsable) )->format('d/m/Y H:i') : 'En attente' }}</td>
+                        <td>
+                            @if($demande->dateValidationResponsable)
+                                {{ (new DateTime($demande->dateValidationResponsable))->format('d/m/Y H:i') }}
+                            @else
+                                {{ __('En attente') }}
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <th>{{ __('Archiviste') }}</th>
@@ -120,11 +126,23 @@
                     </tr>
                     <tr>
                         <th>{{ __('Validation archiviste') }}</th>
-                        <td>{{ (new DateTime($demande->dateValidationArchiviste) ) ? (new DateTime($demande->dateValidationArchiviste) )->format('d/m/Y H:i') : 'En attente' }}</td>
+                        <td>
+                            @if($demande->dateValidationArchiviste)
+                                {{ (new DateTime($demande->dateValidationArchiviste))->format('d/m/Y H:i') }}
+                            @else
+                                {{ __('En attente') }}
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <th>{{ __('Récupération') }}</th>
-                        <td>{{ (new DateTime($demande->dateRecuperation) ) ? (new DateTime($demande->dateRecuperation) )->format('d/m/Y H:i') : 'Non récupéré' }}</td>
+                        <td>
+                            @if($demande->dateRecuperation)
+                                {{ (new DateTime($demande->dateRecuperation))->format('d/m/Y H:i') }}
+                            @else
+                                {{ __('Non récupéré') }}
+                            @endif
+                        </td>
                     </tr>
                 </table>
             </div>
