@@ -88,7 +88,7 @@ class DemandeDocumentController extends Controller
         ]);
         
         // Envoyer un email au responsable
-        //Mail::to($responsable->email)->send(new DemandeDocumentNotification($demande));
+        Mail::to($responsable->email)->send(new DemandeDocumentNotification($demande));
         
         return redirect()->route('demandes.index')->with('success', 'Demande soumise avec succès.');
     }
@@ -122,7 +122,7 @@ class DemandeDocumentController extends Controller
         ]);
         
         // Envoyer un email à l'archiviste
-        //Mail::to($archiviste->email)->send(new DemandeDocumentNotification($demande));
+        Mail::to($archiviste->email)->send(new DemandeDocumentNotification($demande));
         
         return redirect()->route('demandes.index')->with('success', 'Demande approuvée avec succès.');
     }
@@ -203,7 +203,7 @@ class DemandeDocumentController extends Controller
     ]);
 
     // Décommenter pour l'envoi réel
-    // Mail::to($demande->utilisateur->email)->queue(new DemandeDocumentApprouvee($demande, $certificat));
+     Mail::to($demande->utilisateur->email)->queue(new DemandeDocumentApprouvee($demande, $certificat));
 
     return redirect()->route('demandes.index')
         ->with('success', 'Demande approuvée - Récupération prévue le ' 
