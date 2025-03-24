@@ -20,4 +20,20 @@ class Notification extends Model
     {
         return $this->belongsTo(User::class, 'idDestinataire');
     }
+
+    // Dans ton modèle Demande
+    public function document()
+    {
+        return $this->belongsTo(Document::class, 'idDocument');
+    }
+
+    public function utilisateur()
+    {
+        return $this->belongsTo(User::class, 'idUtilisateur');
+    }
+   
+    public function demande()
+    {
+        return $this->belongsTo(DemandeDocument::class, 'idDemande');
+    }
 }

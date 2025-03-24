@@ -83,7 +83,7 @@ class DemandeDocumentController extends Controller
         // Créer une notification pour le responsable
         Notification::create([
             'idDestinataire' => $responsable->idUtilisateur,
-            'message' => 'Nouvelle demande de document à approuver',
+            'message' => 'Nouvelle demande de document "<strong>' . $demande->document->titre . '</strong>" à approuver  | Demandeur: <strong>' . User::find($demande->idUtilisateur)->nom . '</strong>',
             'dateEnvoi' => now()
         ]);
         
@@ -117,7 +117,7 @@ class DemandeDocumentController extends Controller
         // Créer une notification pour l'archiviste
         Notification::create([
             'idDestinataire' => $archiviste->idUtilisateur,
-            'message' => 'Nouvelle demande de document à valider',
+            'message' => 'Nouvelle demande de document à valider " <strong>' . $demande->document->titre . '</strong>" | Demandeur: <strong>' . User::find($demande->idUtilisateur)->nom . '</strong>',
             'dateEnvoi' => now()
         ]);
         
@@ -144,10 +144,10 @@ class DemandeDocumentController extends Controller
             'dateValidationResponsable' => now()
         ]);
         
-        // Créer une notification pour l'utilisateur
+        // Créer une notification pour l'utilisateur (refus)
         Notification::create([
             'idDestinataire' => $demande->idUtilisateur,
-            'message' => 'Votre demande de document a été refusée: ' . $request->commentaire,
+            'message' => 'Votre demande de document "<strong>' . $demande->document->titre . '</strong>" a été refusée: ' . $request->commentaire . ' | Responsable: <strong>' . User::find($demande->idResponsableService)->nom . '</strong>',
             'dateEnvoi' => now()
         ]);
         
@@ -194,11 +194,11 @@ class DemandeDocumentController extends Controller
         return back()->with('error', 'Erreur lors de la génération du certificat');
     }
 
-    // Notification
     Notification::create([
         'idDestinataire' => $demande->idUtilisateur,
-        'message' => 'Votre demande de document "'.$demande->document->titre.'" a été approuvée. Date de récupération: ' 
-                     . Carbon::parse($validated['dateRecuperation'])->translatedFormat('d F Y \à H\hi'),
+        'message' => 'Votre demande de document "<strong>' . $demande->document->titre . '</strong>" a été approuvée. Date de récupération: <strong>' 
+                     . Carbon::parse($validated['dateRecuperation'])->translatedFormat('d F Y \à H\hi') 
+                     . '</strong><br>Archivist : <strong>' . User::find($demande->idArchiviste)->nom . '</strong>',
         'dateEnvoi' => now()
     ]);
 
@@ -226,10 +226,11 @@ class DemandeDocumentController extends Controller
             'dateValidationArchiviste' => now()
         ]);
         
-        // Créer une notification pour l'utilisateur
+        // Créer une notification pour l'utilisateur -> refuser
         Notification::create([
             'idDestinataire' => $demande->idUtilisateur,
-            'message' => 'Votre demande de document a été refusée: ' . $request->commentaire,
+            'message' => 'Votre demande de document "<strong>' . $demande->document->titre . '</strong>" a été refusée: ' . $request->commentaire 
+                        . '| Archivist: <strong>' . User::find($demande->idArchiviste)->nom . '</strong>',
             'dateEnvoi' => now()
         ]);
         
