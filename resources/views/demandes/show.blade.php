@@ -144,6 +144,19 @@
                             @endif
                         </td>
                     </tr>
+                    <tr>
+                        <th>{{ __('Date de retour prévue') }}</th>
+                        <td>
+                            @if($demande->dateRetour)
+                                {{ (new DateTime($demande->dateRetour))->format('d/m/Y H:i') }}
+                                @if($demande->is_overdue)
+                                    <span class="badge bg-danger ml-2">{{ __('En retard') }}</span>
+                                @endif
+                            @else
+                                {{ __('Non définie') }}
+                            @endif
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>
