@@ -57,55 +57,52 @@ class DemandeDocumentController extends Controller
     }
 
     public function store(Request $request)
-    {
-        
-        $request->validate([
-            'service' => 'required|string',
-            'site' => 'required|string',
-            'idDocument' => 'required|exists:documents,idDocument',
-            'description' => 'required|string'
-        ]);
+{
+    $request->validate([
+        'service' => 'required|string',
+        'site' => 'required|string',
+        'idDocument' => 'required|exists:documents,idDocument',
+        'description' => 'required|string'
+    ]);
 
-        $document = Document::findOrFail($request->idDocument);
-        
-        // Trouver un responsable du même service
-        $responsable = User::where('role', 'responsable')
-            ->where('service', $request->service)
-            ->where('site', $request->site)
-            ->first();
-        $admin =User::where('role', 'admin')
+    $document = Document::findOrFail($request->idDocument);
+    
+    $admin = User::where('role', 'admin')->first();
+    
+    // Trouver un responsable du même service
+    $responsable = User::where('role', 'responsable')
+        ->where('service', $request->service)
+        ->where('site', $request->site)
         ->first();
-        
-        if (!$responsable) {
-            return back()->withErrors(['message' => 'Aucun responsable trouvé pour ce service.']);
-        }
-        
-        $demande = DemandeDocument::create([
-            'idUtilisateur' => Auth::id(),
-            'idResponsableService' => $responsable->idUtilisateur,
-            'idDocument' => $request->idDocument,
-            'description' => $request->description,
-            'statut' => 'en_attente',
-            'dateSoumission' => now()
-        ]);
-        
-        // Créer une notification pour le responsable
-        Notification::create([
-            'idDestinataire' => $responsable->idUtilisateur,
-            'message' => 'Nouvelle demande de document "<strong>' . $demande->document->titre . '</strong>" à approuver  | Demandeur: <strong>' . User::find($demande->idUtilisateur)->nom . '</strong>',
-            'dateEnvoi' => now()
-        ]);
+    
+    if (!$responsable) {
+        return back()->withErrors(['message' => 'Aucun responsable trouvé pour ce service.']);
+    }
+    
+    $demande = DemandeDocument::create([
+        'idUtilisateur' => Auth::id(),
+        'idResponsableService' => $responsable->idUtilisateur,
+        'idDocument' => $request->idDocument,
+        'description' => $request->description,
+        'statut' => 'en_attente',
+        'dateSoumission' => now()
+    ]);
+    
+    // Créer une notification pour le responsable
+    Notification::create([
+        'idDestinataire' => $responsable->idUtilisateur,
+        'message' => 'Nouvelle demande de document "<strong>' . $document->titre . '</strong>" à approuver | Demandeur: <strong>' . Auth::user()->nom . '</strong>',
+        'dateEnvoi' => now()
+    ]);
 
-         // Créer une notification pour l'admin
-         Notification::create([
-            'idDestinataire' => $admin->idUtilisateur,
-            'message' => 'La demande de document "<strong>' . $demande->document->titre . '</strong>" a été approuver par
-            <strong>' . User::find($demande->idResponsable)->nom . '</strong>
-             | Demandeur: <strong>' . User::find($demande->idUtilisateur)->nom . '</strong>',
-            'dateEnvoi' => now()
-        ]);
-        
-        // Envoyer un email au responsable
+    // Créer une notification pour l'admin
+    Notification::create([
+        'idDestinataire' => $admin->idUtilisateur,
+        'message' => 'Nouvelle demande de document "<strong>' . $document->titre . '</strong>" en attente le traitement | Demandeur: <strong>' . Auth::user()->nom . '</strong> | Responsable: <strong>' . $responsable->nom . '</strong>',
+        'dateEnvoi' => now()
+    ]);
+     
+       // Envoyer un email au responsable
         Mail::to($responsable->email)->send(new DemandeDocumentNotification($demande));
 
         // Envoyer un email au admin
@@ -118,6 +115,7 @@ class DemandeDocumentController extends Controller
         $demande = DemandeDocument::findOrFail($id);
         $admin =User::where('role', 'admin')
         ->first();
+        
         if (Auth::user()->idUtilisateur != $demande->idResponsableService) {
             return back()->withErrors(['message' => 'Vous n\'êtes pas autorisé à approuver cette demande.']);
         }
@@ -186,10 +184,11 @@ class DemandeDocumentController extends Controller
         ]);
         // Créer une notification pour l'admin (refus Responsable)
         Notification::create([
-            'idDestinataire' => $demande->idUtilisateur,
+            'idDestinataire' => $admin->idUtilisateur,
             'message' => 'Une demande de document 
-            "<strong>' . $demande->document->titre . '</strong>" a été refusée: ' . $request->commentaire . ' par  
-             <strong>' . User::find($demande->idResponsableService)->nom . '</strong> 
+            "<strong>' . $demande->document->titre . '</strong>" a été refusée:  par  
+             <strong>' . User::find($demande->idResponsableService)->nom . '</strong> | motif :
+               <strong> ' . $request->commentaire . ' </strong>
              | Demandeur: <strong>' . User::find($demande->idUtilisateur)->nom . '</strong>',
             'dateEnvoi' => now()
         ]);
@@ -237,7 +236,7 @@ class DemandeDocumentController extends Controller
         Log::error("Erreur création certificat: " . $e->getMessage());
         return back()->with('error', 'Erreur lors de la génération du certificat');
     }
-    // Notification Approuve archiviste
+    // Notification pour l'utilisateur-> Approuve archiviste
     Notification::create([
         'idDestinataire' => $demande->idUtilisateur,
         'message' => 'Votre demande de document "<strong>' . $demande->document->titre . '</strong>" a été approuvée. Date de récupération: <strong>' 
@@ -245,9 +244,9 @@ class DemandeDocumentController extends Controller
                      . '</strong><br>Archivist : <strong>' . User::find($demande->idArchiviste)->nom . '</strong>',
         'dateEnvoi' => now()
     ]);
-    // Notification Approuve de l'admin
+    // Notification pour de l'admin -> Approuve archiviste
     Notification::create([
-        'idDestinataire' => $demande->idUtilisateur,
+        'idDestinataire' => $admin->idUtilisateur,
         'message' => 'La demande de document "<strong>' . $demande->document->titre . '</strong>" a été approuvée. par 
         <strong>' . User::find($demande->idArchiviste)->nom . '</strong>
          | Date de récupération: <strong>' 
@@ -294,6 +293,7 @@ class DemandeDocumentController extends Controller
             'idDestinataire' => $admin->idUtilisateur,
             'message' => 'Le demande de document "<strong>' . $demande->document->titre . '</strong>" a été refusée par 
             <strong>' . User::find($demande->idArchiviste)->nom . '</strong>
+            | motif : <strong> ' . $request->commentaire . ' </strong>
               | Demandeur: <strong>' . User::find($demande->idUtilisateur)->nom . '</strong>',
             'dateEnvoi' => now()
         ]);
