@@ -47,6 +47,7 @@ class AuthController extends Controller
         
         $request->validate([
             'nom' => 'required|string|max:255',
+            
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'fonction' => 'nullable|string|max:255',
@@ -54,6 +55,7 @@ class AuthController extends Controller
             'direction' => 'nullable|string|max:255',
             'service' => 'nullable|string|max:255',
             'role' => 'required|string|in:Utilisateur,Responsable,Archiviste,Admin',
+            'site' => 'required|string|max:255',
         ]);
 
         User::create([
@@ -65,6 +67,7 @@ class AuthController extends Controller
             'direction' => $request->direction,
             'service' => $request->service,
             'role' => $request->role,
+            'site' => $request->site,
         ]);
 
         return redirect('/login')->with('success', 'Registration successful! Please login.');

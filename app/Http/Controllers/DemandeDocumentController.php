@@ -49,13 +49,18 @@ class DemandeDocumentController extends Controller
 
     public function create()
     {
-        $documents = Document::where('statut', 'disponible')->get();
-        return view('demandes.create', compact('documents'));
+        $services = Document::select('service')->distinct()->pluck('service');
+        $sites = User::select('site')->distinct()->pluck('site');
+        
+        return view('demandes.create', compact('services', 'sites'));
     }
 
     public function store(Request $request)
     {
+        
         $request->validate([
+            'service' => 'required|string',
+            'site' => 'required|string',
             'idDocument' => 'required|exists:documents,idDocument',
             'description' => 'required|string'
         ]);
@@ -64,7 +69,8 @@ class DemandeDocumentController extends Controller
         
         // Trouver un responsable du même service
         $responsable = User::where('role', 'responsable')
-            ->where('service', $document->service)
+            ->where('service', $request->service)
+            ->where('site', $request->site)
             ->first();
         
         if (!$responsable) {

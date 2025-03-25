@@ -333,11 +333,29 @@
                                                                 </span>
                                                             </td>
                                                             <td>{{ $demande->dateSoumission }}</td>
-                                                            <td>{{ (new DateTime($demande->dateValidationResponsable) ) ? (new DateTime($demande->dateValidationResponsable) )->format('Y-m-d H:i:s') : 'Pending' }}</td>
+                                                            <td>
+                                                                @if($dateValidationResponsable)
+                                                                {{ (new DateTime($dateValidationResponsable))->format('d/m/Y H:i') }}
+                                                                @else
+                                                                    {{ __('En attente') }}
+                                                                @endif
+                                                            </td>
                                                             <td>{{ $delaiResponsable !== null ? $delaiResponsable . ' H' : '-' }}</td>
-                                                            <td>{{ (new DateTime($demande->dateValidationArchiviste) ) ? (new DateTime($demande->dateValidationArchiviste) )->format('Y-m-d H:i:s') : 'Pending' }}</td>
+                                                            <td>
+                                                                @if($dateValidationArchiviste)
+                                                                    {{ (new DateTime($dateValidationArchiviste))->format('d/m/Y H:i') }}
+                                                                @else
+                                                                    {{ __('En attente') }}
+                                                                @endif
+                                                            </td>
                                                             <td>{{ $delaiArchiviste !== null ? $delaiArchiviste . ' H' : '-' }}</td>
-                                                            <td>{{ (new DateTime($demande->dateRecuperation) ) ? (new DateTime($demande->dateRecuperation) )->format('Y-m-d H:i:s') : 'Pending' }}</td>
+                                                            <td>
+                                                                @if($dateRecuperation)
+                                                                {{ (new DateTime($dateRecuperation))->format('d/m/Y H:i') }}
+                                                                @else
+                                                                    {{ __('Non récupéré') }}
+                                                                @endif
+                                                            </td>
                                                             <td>{{ $tempsTotalTraitement !== null ? $tempsTotalTraitement . ' hours' : '-' }}</td>
                                                         </tr>
                                                     @endforeach

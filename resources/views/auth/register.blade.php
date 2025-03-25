@@ -58,6 +58,10 @@
                                 <option value="Admin">Admin</option>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label for="site" class="form-label">Site</label>
+                            <input type="text" name="site" id="site" class="form-control" required>
+                        </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Register</button>
                         </div>
