@@ -151,9 +151,6 @@ class DemandeDocumentController extends Controller
         
         // Envoyer un email à l'archiviste
         Mail::to($archiviste->email)->send(new DemandeDocumentNotification($demande));
-        
-        // Envoyer un email à l'archiviste
-        Mail::to($archiviste->email)->send(new DemandeDocumentNotification($demande));
        
         return redirect()->route('demandes.index')->with('success', 'Demande approuvée avec succès.');
     }
@@ -317,6 +314,7 @@ class DemandeDocumentController extends Controller
     
     $demande->update([
         'statut' => 'récupéré',
+        'dateRecuperation' => now(),
         'dateRetour' => $dateRetour
     ]);
     

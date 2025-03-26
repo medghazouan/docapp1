@@ -5,10 +5,42 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use App\Models\User;
 
 class AuthController extends Controller
 {
+    public function showIdForm()
+    {
+        return view('auth.id-check');
+    }
+
+    public function checkId(Request $request)
+    {
+        $request->validate([
+            'idUtilisateur' => 'required'
+        ]);
+
+        $user = User::find($request->idUtilisateur);
+
+        if (!$user) {
+            return back()->withErrors(['message' => 'User ID not found']);
+        }
+
+        // Generate temporary password
+        $tempPassword = Str::random(8);
+        $user->password = Hash::make($tempPassword);
+        $user->save();
+
+        // Send password by email
+        Mail::raw("Your temporary password is: " . $tempPassword, function($message) use ($user) {
+            $message->to($user->email)
+                   ->subject('Your Temporary Login Password');
+        });
+
+        return redirect()->route('login')->with('success', 'A temporary password has been sent to your email.');
+    }
     public function showLoginForm()
     {
         return view('auth.login');

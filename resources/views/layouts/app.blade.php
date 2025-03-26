@@ -97,9 +97,7 @@
                                     <a class="dropdown-item" href="{{ route('users.edit', Auth::user()->idUtilisateur) }}">
                                         <i class="fas fa-user"></i> {{ __('Mon Profil') }}
                                     </a>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="fas fa-cog"></i> {{ __('Paramètres') }}
-                                    </a>
+                                    
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();

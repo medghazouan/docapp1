@@ -16,17 +16,12 @@
         <div id="box" class="col-md-6 d-flex justify-content-center align-items-center">
             <div class="login-card">
                 <div class="card-header text-center">
-                    <h2>Utilisateur</h2>
+                    <h2>Vérification d'ID</h2>
                     <div class="tab-underline"></div>
                 </div>
                 <div class="card-body">
-                    <h4 class="text-center mb-3">CONNECTEZ-VOUS À VOTRE COMPTE</h4>
-                    <p class="text-center text-muted mb-4">Demandez des documents en ligne sans effort</p>
-                    @if (session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
-                    @endif
+                    <h4 class="text-center mb-3">ENTREZ VOTRE IDENTIFIANT</h4>
+                    <p class="text-center text-muted mb-4">Un mot de passe temporaire vous sera envoyé par email</p>
 
                     @if ($errors->any())
                         <div class="alert alert-danger">
@@ -37,27 +32,18 @@
                             </ul>
                         </div>
                     @endif
-                    
-                    <form action="{{ route('login') }}" method="POST">
+
+                    <form method="POST" action="{{ route('check.id') }}">
                         @csrf
                         <div class="mb-3">
                             <label for="idUtilisateur" class="form-label">ID Utilisateur</label>
-                            <input type="text" name="idUtilisateur" id="idUtilisateur" class="form-control" required>
+                            <input type="text" class="form-control" id="idUtilisateur" name="idUtilisateur" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mot de passe</label>
-                            <input type="password" name="password" id="password" class="form-control" required>
-                        </div>
+
                         <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-connect">connecter</button>
+                            <button type="submit" class="btn btn-connect">Obtenir le mot de passe</button>
                         </div>
                     </form>
-                    <div class="text-center mt-4">
-                        <hr class="divider">
-                        <a href="{{ route('id.check') }}" class="forgot-password-link">
-                            <i class="fas fa-key me-2"></i>Mot de passe oublié ?
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -69,7 +55,6 @@
 </div>
 
 <style>
-
 /* Main Container */
 #container {
     min-height: 100vh;
@@ -203,25 +188,6 @@ h4 {
     padding: 1rem;
     font-size: 12px;
     color: #777;
-}
-
-.divider {
-    margin: 20px auto;
-    width: 80%;
-    border-top: 1px solid #eee;
-}
-
-.forgot-password-link {
-    color: #b8a369;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.forgot-password-link:hover {
-    color: #a89355;
-    text-decoration: none;
 }
 
 /* Responsive Adjustments */

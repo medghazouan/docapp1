@@ -11,9 +11,11 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect()->route('id.check');
 });
 
+Route::get('/id-check', [AuthController::class, 'showIdForm'])->name('id.check');
+Route::post('/check-id', [AuthController::class, 'checkId'])->name('check.id');
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
