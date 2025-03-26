@@ -42,11 +42,13 @@
                                     <i class="fas fa-file-alt me-2"></i>{{ __('Demandes') }}
                                 </a>
                             </li>
+                            @if(Auth::user()->role != 'utilisateur')   
                             <li class="nav-item">
                                 <a class="nav-link {{ Request::routeIs('documents*') ? 'active' : '' }}" href="{{ route('documents.index') }}">
                                     <i class="fas fa-folder-open me-2"></i>{{ __('Documents') }}
                                 </a>
                             </li>
+                            @endif
                             @if(Auth::user()->role == 'admin')
                                 <li class="nav-item">
                                     <a class="nav-link {{ Request::routeIs('users*') ? 'active' : '' }}" href="{{ route('users.index') }}">

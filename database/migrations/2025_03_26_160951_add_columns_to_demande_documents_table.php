@@ -12,7 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('demande_documents', function (Blueprint $table) {
-            $table->enum('statut_retour', ['en_cours', 'retourne', 'en_retard'])->default('en_cours');
+            $table->date('dateRetour')->nullable();
+            $table->enum('statut_retour', [
+                'possede',      
+                'rendu',        
+                'retard'      
+            ])->default('possede');
         });
     }
 
