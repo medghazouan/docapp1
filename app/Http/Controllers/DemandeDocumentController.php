@@ -14,8 +14,9 @@ use App\Mail\DemandeDocumentNotification;
 use App\Mail\DemandeDocumentNotificationAdmin;
 use App\Mail\DemandeDocumentNotificationToArchiviste;
 use App\Mail\DemandeDocumentApprouvee;
-use App\Mail\DemandeDocumentRefusToAdmin;
+use App\Mail\DemandeDocumentApprouveRecuperation;
 use App\Mail\DemandeDocumentRefus;
+use App\Mail\DemandeDocumentRefusToAdmin;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -425,7 +426,7 @@ return redirect()->route('demandes.index')
                      . $dateRetour->format('d/m/Y') . "</strong>",
         'dateEnvoi' => now()
     ]);
-
+    
     // Créer une notification pour l'admin
     $adminUsers = User::where('role', 'admin')->pluck('idUtilisateur');
     foreach ($adminUsers as $adminId) {
@@ -435,6 +436,31 @@ return redirect()->route('demandes.index')
                          . $dateRetour->format('d/m/Y') . "</strong>",
             'dateEnvoi' => now()
         ]);
+    }
+    
+    // Envoyer un email à l'utilisateur
+    Mail::to($demande->utilisateur->email)->send(
+        new DemandeDocumentApprouveRecuperation(
+            $demande, 
+            $certificat, 
+            $document, 
+            $dateRetour, 
+            'user'
+        )
+    );
+
+    // Envoyer un email à l'admin
+    $adminUsers = User::where('role', 'admin')->get();
+    foreach ($adminUsers as $admin) {
+        Mail::to($admin->email)->send(
+            new DemandeDocumentApprouveRecuperation(
+                $demande, 
+                $certificat, 
+                $document, 
+                $dateRetour, 
+                'admin'
+            )
+        );
     }
     
     return redirect()->route('demandes.index')->with('success', 'Document marqué comme récupéré avec succès.');

@@ -9,6 +9,7 @@ par l'archiviste : <strong>{{ App\Models\User::find($demande->idArchiviste)->nom
 * **Document:** {{ $demande->document->titre }}
 * **Description:** {{ $demande->description }}
 * **Archiviste:**  {{ App\Models\User::find($demande->idArchiviste)->nom }}
+* **Responsable :** {{ App\Models\User::find($demande->idResponsableService)->nom }}
 * **Date de soumission:** {{ (new DateTime( $demande->dateSoumission))->format('d/m/Y H:i') }}
 
 
