@@ -17,30 +17,34 @@ class AuthController extends Controller
     }
 
     public function checkId(Request $request)
-    {
-        $request->validate([
-            'idUtilisateur' => 'required'
-        ]);
+{
+    $request->validate([
+        'idUtilisateur' => 'required'
+    ]);
 
-        $user = User::find($request->idUtilisateur);
+    $user = User::find($request->idUtilisateur);
 
-        if (!$user) {
-            return back()->withErrors(['message' => 'User ID not found']);
-        }
-
-        // Generate temporary password
-        $tempPassword = Str::random(8);
-        $user->password = Hash::make($tempPassword);
-        $user->save();
-
-        // Send password by email
-        Mail::raw("Your temporary password is: " . $tempPassword, function($message) use ($user) {
-            $message->to($user->email)
-                   ->subject('Your Temporary Login Password');
-        });
-
-        return redirect()->route('login')->with('success', 'A temporary password has been sent to your email.');
+    if (!$user) {
+        return back()->withErrors(['message' => 'Identifiant utilisateur non trouvé']);
     }
+
+    // Générer un mot de passe temporaire
+    $tempPassword = Str::random(8);
+    $user->password = Hash::make($tempPassword);
+    $user->save();
+
+    // Envoyer un email professionnel
+    Mail::send('emails.password_reset', [
+        'tempPassword' => $tempPassword,
+        'userName' => $user->nom
+    ], function($message) use ($user) {
+        $message->to($user->email)
+               ->subject('Réinitialisation de votre mot de passe - Menara Holding')
+               ->from('Abdelmounaimelidrissi@gmail.com', 'Menara Holding');
+    });
+
+    return redirect()->route('login')->with('success', 'Un mot de passe temporaire a été envoyé à votre adresse email.');
+}
     public function showLoginForm()
     {
         return view('auth.login');

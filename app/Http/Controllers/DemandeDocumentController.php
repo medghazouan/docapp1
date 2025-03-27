@@ -11,10 +11,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\DemandeDocumentNotification;
+use App\Mail\DemandeDocumentNotificationAdmin;
+use App\Mail\DemandeDocumentNotificationToArchiviste;
 use App\Mail\DemandeDocumentApprouvee;
+use App\Mail\DemandeDocumentRefusToAdmin;
+use App\Mail\DemandeDocumentRefus;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use App\Http\Controllers\NotificationController;
+
 
 
 class DemandeDocumentController extends Controller
@@ -106,7 +110,7 @@ class DemandeDocumentController extends Controller
         Mail::to($responsable->email)->send(new DemandeDocumentNotification($demande));
 
         // Envoyer un email au admin
-        Mail::to($admin->email)->send(new DemandeDocumentNotification($demande));
+        Mail::to($admin->email)->send(new DemandeDocumentNotificationAdmin($demande));
         return redirect()->route('demandes.index')->with('success', 'Demande soumise avec succès.');
     }
 
@@ -151,6 +155,8 @@ class DemandeDocumentController extends Controller
         
         // Envoyer un email à l'archiviste
         Mail::to($archiviste->email)->send(new DemandeDocumentNotification($demande));
+        // Envoyer un email à l'admin
+        Mail::to($admin->email)->send(new DemandeDocumentNotificationToArchiviste($demande));
        
         return redirect()->route('demandes.index')->with('success', 'Demande approuvée avec succès.');
     }
@@ -164,6 +170,11 @@ class DemandeDocumentController extends Controller
         $demande = DemandeDocument::findOrFail($id);
         $admin =User::where('role', 'admin')
         ->first();
+        // Trouver un responsable du même service
+        $responsable = User::where('role', 'responsable')
+            ->where('service', $request->service)
+            ->where('site', $request->site)
+            ->first();
         if (Auth::user()->idUtilisateur != $demande->idResponsableService) {
             return back()->withErrors(['message' => 'Vous n\'êtes pas autorisé à rejeter cette demande.']);
         }
@@ -172,8 +183,20 @@ class DemandeDocumentController extends Controller
             'statut' => 'refusé_responsable',
             'dateValidationResponsable' => now()
         ]);
+
+        // Récupérez le commentaire
+        $commentaire = $request->commentaire ?? null;
+
+        // Créez le certificat de refus si ce n'est pas déjà fait
+        $certificat = Certificat::create([
+            'idDemande' => $demande->idDemande,
+            'idUtilisateur' => $demande->idUtilisateur,
+            'idDocument' => $demande->idDocument,
+            'dateGeneration' => now(),
+            'signatureUtilisateur' => false
+        ]);
         
-        // Créer une notification pour l'utilisateur (refus)
+        // Créer une notification pour l'utilisateur (refus Responsable)
         Notification::create([
             'idDestinataire' => $demande->idUtilisateur,
             'message' => 'Votre demande de document "<strong>' . $demande->document->titre . '</strong>" a été refusée: ' . $request->commentaire . ' | Responsable: <strong>' . User::find($demande->idResponsableService)->nom . '</strong>',
@@ -189,6 +212,29 @@ class DemandeDocumentController extends Controller
              | Demandeur: <strong>' . User::find($demande->idUtilisateur)->nom . '</strong>',
             'dateEnvoi' => now()
         ]);
+
+
+        // Envoyer un email à l'utilisateur (refus Responsable)
+        Mail::to($demande->utilisateur->email)->send(
+            new DemandeDocumentRefus(
+                $demande, 
+                $certificat, 
+                $commentaire, 
+                'responsable', 
+                'utilisateur'
+            )
+        );
+
+        // Envoyer un email à l'admin (refus Responsable)
+        Mail::to($admin->email)->send(
+            new DemandeDocumentRefus(
+                $demande, 
+                $certificat, 
+                $commentaire, 
+                'responsable', 
+                'admin'
+            )
+        );
         
         return redirect()->route('demandes.index')->with('success', 'Demande refusée avec succès.');
     }
@@ -252,13 +298,19 @@ class DemandeDocumentController extends Controller
         'dateEnvoi' => now()
     ]);
 
-    // Décommenter pour l'envoi réel
-     Mail::to($demande->utilisateur->email)->queue(new DemandeDocumentApprouvee($demande, $certificat));
-    // Envoyer un email a l'admin
-    Mail::to($admin->email)->send(new DemandeDocumentNotification($demande));
-    return redirect()->route('demandes.index')
-        ->with('success', 'Demande approuvée - Récupération prévue le ' 
-              . Carbon::parse($validated['dateRecuperation'])->translatedFormat('d/m/Y à H\hi'));
+    // Envoyer email à l'utilisateur     
+    Mail::to($demande->utilisateur->email)->queue(
+        new DemandeDocumentApprouvee($demande, $certificat, 'user')
+    );     
+
+    // Envoyer un email à l'admin     
+    Mail::to($admin->email)->send(
+        new DemandeDocumentApprouvee($demande, $certificat, 'admin')
+    );     
+
+return redirect()->route('demandes.index')
+    ->with('success', 'Demande approuvée - Récupération prévue le '
+        . Carbon::parse($validated['dateRecuperation'])->translatedFormat('d/m/Y à H\hi'));
 }
     public function rejectByArchiviste(Request $request, $id)
     {
@@ -277,12 +329,26 @@ class DemandeDocumentController extends Controller
             'statut' => 'refusé_archiviste',
             'dateValidationArchiviste' => now()
         ]);
+
+        // Récupérez le commentaire
+        $commentaire = $request->commentaire ?? null;
+
+        // Créez le certificat de refus si ce n'est pas déjà fait
+        $certificat = Certificat::create([
+            'idDemande' => $demande->idDemande,
+            'idUtilisateur' => $demande->idUtilisateur,
+            'idDocument' => $demande->idDocument,
+            'dateGeneration' => now(),
+            'signatureUtilisateur' => false
+        ]);
         
-        // Créer une notificationde reject archiviste pour l'utilisateur 
+        // Créer une notification de reject archiviste pour l'utilisateur 
         Notification::create([
             'idDestinataire' => $demande->idUtilisateur,
-            'message' => 'Votre demande de document "<strong>' . $demande->document->titre . '</strong>" a été refusée: ' . $request->commentaire 
-                        . '| Archivist: <strong>' . User::find($demande->idArchiviste)->nom . '</strong>',
+            'message' => 'votre demande de document "<strong>' . $demande->document->titre . '</strong>" a été refusée par l archiviste
+            <strong>' . User::find($demande->idArchiviste)->nom . '</strong>
+            | motif : <strong> ' . $request->commentaire . ' </strong>
+              | Demandeur: <strong>' . User::find($demande->idUtilisateur)->nom . '</strong>',
             'dateEnvoi' => now()
         ]);
         // Créer une notification de reject archiviste pour l'admin
@@ -294,6 +360,28 @@ class DemandeDocumentController extends Controller
               | Demandeur: <strong>' . User::find($demande->idUtilisateur)->nom . '</strong>',
             'dateEnvoi' => now()
         ]);
+        // Envoyer un email à l'utilisateur (refus Archiviste)
+        Mail::to($demande->utilisateur->email)->send(
+            new DemandeDocumentRefus(
+                $demande, 
+                $certificat, 
+                $commentaire, 
+                'archiviste', 
+                'utilisateur'
+            )
+        );
+
+        // Envoyer un email à l'admin (refus Archiviste)
+        Mail::to($admin->email)->send(
+            new DemandeDocumentRefus(
+                $demande, 
+                $certificat, 
+                $commentaire, 
+                'archiviste', 
+                'admin'
+            )
+        );
+
         return redirect()->route('demandes.index')->with('success', 'Demande refusée avec succès.');
     }
     public function markAsRetrieved(Request $request, $id)

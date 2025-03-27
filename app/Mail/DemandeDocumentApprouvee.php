@@ -13,16 +13,26 @@ class DemandeDocumentApprouvee extends Mailable
 
     public $demande;
     public $certificat;
+    public $viewType;
 
-    public function __construct(DemandeDocument $demande, Certificat $certificat)
+    public function __construct(DemandeDocument $demande, Certificat $certificat, $viewType = 'user')
     {
         $this->demande = $demande;
         $this->certificat = $certificat;
+        $this->viewType = $viewType;
     }
 
     public function build()
     {
-        return $this->markdown('emails.demande-approuvee')
-                    ->subject('Votre demande de document a été approuvée');
+        switch ($this->viewType) {
+            case 'admin':
+                return $this->markdown('emails.demande-approuvee-admin')
+                            ->subject('Nouvelle demande de document approuvée');
+            
+            case 'user':
+            default:
+                return $this->markdown('emails.demande-approuvee')
+                            ->subject('Votre demande de document a été approuvée');
+        }
     }
 }
