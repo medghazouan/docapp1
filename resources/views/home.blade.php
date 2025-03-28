@@ -257,6 +257,20 @@
                                                     <canvas id="processingTimeChart"></canvas>
                                                 </div>
                                             </div>
+                                            <div class="row mt-4">
+                                                <div class="col-md-12">
+                                                    <div class="card">
+                                                        <div class="card-header">
+                                                            <h5>Temps de retour moyen (heures)</h5>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div style="height: 300px;">
+                                                                <canvas id="returnTimeChart"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -287,6 +301,8 @@
                                                         <th>Archivist Delay h</th>
                                                         <th>Retrieval</th>
                                                         <th>Total Time h</th>
+                                                        <th>Date Retour spécifiée</th>
+
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -297,6 +313,7 @@
                                                             $dateValidationResponsable = $demande->dateValidationResponsable ? \Carbon\Carbon::parse($demande->dateValidationResponsable) : null;
                                                             $dateValidationArchiviste = $demande->dateValidationArchiviste ? \Carbon\Carbon::parse($demande->dateValidationArchiviste) : null;
                                                             $dateRecuperation = $demande->dateRecuperation ? \Carbon\Carbon::parse($demande->dateRecuperation) : null;
+                                                            $dateRetour = $demande->dateRetour ? \Carbon\Carbon::parse($demande->dateRetour) : null;
 
                                                             $delaiResponsable = $dateValidationResponsable ? $dateSoumission->diffInHours($dateValidationResponsable) : null;
                                                             $delaiArchiviste = ($dateValidationArchiviste && $dateValidationResponsable) ?$dateValidationResponsable->diffInHours($dateValidationArchiviste) : null;
@@ -357,6 +374,13 @@
                                                                 @endif
                                                             </td>
                                                             <td>{{ $tempsTotalTraitement !== null ? $tempsTotalTraitement . ' hours' : '-' }}</td>
+                                                            <td>
+                                                                @if($dateRetour)
+                                                                    {{ (new DateTime($dateRetour))->format('d/m/Y ') }}
+                                                                @else
+                                                                    {{ __('-') }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
@@ -714,6 +738,65 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Only create charts if elements exist (admin view)
+    if (document.getElementById('returnTimeChart')) {
+        var returnTimeCtx = document.getElementById('returnTimeChart').getContext('2d');
+        var returnTimeHours = {{ isset($stats['avg_return_time']) ? $stats['avg_return_time'] : 0 }};
+        var returnTimeDays = returnTimeHours / 24;
+
+        var returnTimeChart = new Chart(returnTimeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Temps de retour moyen'],
+                datasets: [{
+                    label: 'Heures',
+                    data: [returnTimeHours],
+                    backgroundColor: 'rgba(164, 150, 114, 0.9)',
+                    borderColor: 'rgba(164, 150, 114, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: { display: false },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            fontColor: '#171717',
+                            callback: function(value) {
+                                return value + ' h';
+                            }
+                        },
+                        gridLines: {
+                            color: 'rgba(164, 150, 114, 0.1)',
+                            zeroLineColor: 'rgba(164, 150, 114, 0.2)'
+                        }
+                    }],
+                    xAxes: [{
+                        gridLines: {
+                            display: false
+                        },
+                        ticks: {
+                            fontColor: '#171717'
+                        }
+                    }]
+                },
+                tooltips: {
+                    backgroundColor: '#171717',
+                    titleFontColor: '#ffffff',
+                    bodyFontColor: '#ffffff',
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            var hours = tooltipItem.yLabel;
+                            var days = (hours / 24).toFixed(1);
+                            return hours.toFixed(1) + ' heures (' + days + ' jours)';
+                        }
+                    }
+                }
+            }
+        });
+    }
     if (document.getElementById('statusChart')) {
         // Status distribution chart
         var statusCtx = document.getElementById('statusChart').getContext('2d');

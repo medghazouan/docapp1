@@ -1,4 +1,4 @@
-<!-- resources/views/emails/overdue-document.blade.php -->
+
 <!DOCTYPE html>
 <html>
 <body>

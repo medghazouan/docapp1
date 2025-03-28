@@ -44,6 +44,12 @@
                             <button type="submit" class="btn btn-connect">Obtenir le mot de passe</button>
                         </div>
                     </form>
+                    <div class="text-center mt-4">
+                        <hr class="divider">
+                        <a href="{{ route('login') }}" class="forgot-password-link">
+                            <i class="fas fa-key me-2"></i>J'ai deja le Mot de passe
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -55,6 +61,18 @@
 </div>
 
 <style>
+    .forgot-password-link {
+    color: #b8a369;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.forgot-password-link:hover {
+    color: #a89355;
+    text-decoration: none;
+}
 /* Main Container */
 #container {
     min-height: 100vh;

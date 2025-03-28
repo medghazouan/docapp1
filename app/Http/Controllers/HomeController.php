@@ -58,6 +58,8 @@ class HomeController extends Controller
         
         // Calculate average processing time
         $stats['avg_processing_time'] = $this->calculateAverageProcessingTime($statsQuery);
+        // Add this line before the return statement in handleAdminDashboard method
+        $stats['avg_return_time'] = $this->calculateAverageReturnTime($statsQuery);
 
         return view('home', compact('stats', 'unreadNotifications', 'demandes', 'documentTypes', 'services'));
     }
@@ -135,6 +137,16 @@ class HomeController extends Controller
             ->first();
 
         return $result && $result->avg_time ? $result->avg_time : 0;
+    }
+    private function calculateAverageReturnTime($query)
+{
+        $result = $query->clone()
+            ->whereNotNull('dateRecuperation')
+            ->whereNotNull('dateRetour')
+            ->selectRaw('ROUND(AVG(TIMESTAMPDIFF(HOUR, dateRecuperation, dateRetour)), 2) as avg_return_time')
+            ->first();
+
+        return $result && $result->avg_return_time ? $result->avg_return_time : 0;
     }
 
     private function handleUserDashboard($user, $unreadNotifications)

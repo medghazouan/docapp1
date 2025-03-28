@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'DocApp') }}</title>
+    <title>{{ config('app.name', 'Menara Holding') }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
@@ -22,7 +23,12 @@
         <nav class="navbar navbar-expand-md">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="{{ asset('images/menaraHoldingLogo.png') }}" alt="Logo" onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><rect width=\'40\' height=\'40\' fill=\'%23a49672\'/><text x=\'50%\' y=\'50%\' font-size=\'20\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23171717\'>MH</text></svg>'">
+                    <img src="{{ asset('images/menaraHoldingLogo.png') }}" 
+                         alt="{{ config('app.name') }}" 
+                         height="40"
+                         class="d-inline-block align-top"
+                         onerror="this.src='data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'><rect width=\'40\' height=\'40\' fill=\'%23a49672\'/><text x=\'50%\' y=\'50%\' font-size=\'20\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23171717\'>MH</text></svg>'">
+                    <span class="ms-2 d-none d-md-inline">{{ config('app.name') }}</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>

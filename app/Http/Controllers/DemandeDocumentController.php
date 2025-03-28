@@ -45,6 +45,7 @@ class DemandeDocumentController extends Controller
                 ->paginate(10);
         }
         
+        
         return view('demandes.index', compact('demandes'));
     }
 
