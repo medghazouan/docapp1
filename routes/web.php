@@ -19,7 +19,7 @@ Route::post('/check-id', [AuthController::class, 'checkId'])->name('check.id');
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+//Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 Route::middleware('auth')->group(function () {
