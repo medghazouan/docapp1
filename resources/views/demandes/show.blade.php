@@ -237,44 +237,79 @@
                 @if(Auth::user()->role == 'archiviste' && Auth::user()->idUtilisateur == $demande->idArchiviste && $demande->statut == 'approuvé_responsable')
                 <div class="row">
                     <div class="col-md-6">
-                        <form method="POST" action="{{ route('demandes.approve.archiviste', $demande->idDemande) }}">
-                            @csrf
-                            <button type="submit" class="btn btn-success w-100">
-                                <i class="fas fa-check"></i> {{ __('Approuver') }}
-                            </button>
-                        </form>
+                        <!-- Remove the form and just keep the button for modal trigger -->
+                        <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#approveModal{{ $demande->idDemande }}">
+                            <i class="fas fa-check"></i> {{ __('Approuver') }}
+                        </button>
                     </div>
                     <div class="col-md-6">
-                        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectArchivisteModal">
+                        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $demande->idDemande }}">
                             <i class="fas fa-times"></i> {{ __('Refuser') }}
                         </button>
                     </div>
                 </div>
 
-                <!-- Reject Modal for Archiviste -->
-                <div class="modal fade" id="rejectArchivisteModal" tabindex="-1" aria-labelledby="rejectArchivisteModalLabel" aria-hidden="true">
+                <!-- Modal d'approbation -->
+                <div class="modal fade" id="approveModal{{ $demande->idDemande }}" tabindex="-1" aria-labelledby="approveModalLabel{{ $demande->idDemande }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form method="POST" action="{{ route('demandes.approve.archiviste', $demande->idDemande) }}">
+                                @csrf
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="approveModalLabel{{ $demande->idDemande }}">Fixer la date de récupération</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="dateRecuperation" class="form-label">Date de récupération *</label>
+                                        <input type="datetime-local" 
+                                            class="form-control" 
+                                            id="dateRecuperation" 
+                                            name="dateRecuperation" 
+                                            min="{{ now()->format('Y-m-d\TH:i') }}"
+                                            required>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <button type="submit" class="btn btn-success">Valider l'approbation</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- Rejection Modal -->
+                <div class="modal fade" id="rejectModal{{ $demande->idDemande }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $demande->idDemande }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <form method="POST" action="{{ route('demandes.reject.archiviste', $demande->idDemande) }}">
                                 @csrf
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="rejectArchivisteModalLabel">{{ __('Refuser la demande') }}</h5>
+                                    <h5 class="modal-title" id="rejectModalLabel{{ $demande->idDemande }}">{{ __('Refuser la demande') }}</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div class="mb-3">
-                                        <label for="commentaire" class="form-label">{{ __('Motif du refus') }}</label>
-                                        <textarea class="form-control" id="commentaire" name="commentaire" rows="3" required></textarea>
+                                        <label for="commentaire{{ $demande->idDemande }}" class="form-label">{{ __('Motif du refus') }}</label>
+                                        <textarea class="form-control " 
+                                                id="commentaire{{ $demande->idDemande }}" 
+                                                name="commentaire" 
+                                                rows="3" 
+                                                required></textarea>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Annuler') }}</button>
-                                    <button type="submit" class="btnbtn-danger\">{{ __('Confirmer le refus') }}</button>
-                        </div>
-                        </form>
-                        </div>
-                    </div>
-                </div>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        <i class="fas fa-times"></i> {{ __('Annuler') }}
+                                    </button>
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-check"></i> {{ __('Confirmer le refus') }}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 @endif
 
                                 @if(Auth::user()->role == 'archiviste' && $demande->statut == 'approuvé_archiviste')

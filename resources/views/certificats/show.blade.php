@@ -85,7 +85,12 @@
                                     {{ (new DateTime($certificat->demande->dateRecuperation) ) ? (new DateTime($certificat->demande->dateRecuperation)) ->format('d/m/Y H:i') : 'Non récupéré' }}
                                 </p>
                                 <p><strong>Date de retour prévue:</strong> 
-                                    {{ (new DateTime($certificat->demande->dateRetour) ) ? (new DateTime($certificat->demande->dateRetour)) ->format('d/m/Y H:i') : 'Non récupéré' }}
+                                    @if($certificat->demande->dateRetour)
+                                        {{ (new DateTime($certificat->demande->dateRetour))->format('d/m/Y H:i') }}
+                                        
+                                    @else
+                                        {{ __('Non définie') }}
+                                    @endif
                                 </p>
                             </div>
                         </div>
