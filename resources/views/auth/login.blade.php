@@ -4,16 +4,16 @@
 <div id="container">
     <div class="row">
         <div class="col-md-6 branding-section">
-            <!-- Logo Placeholder - Add your circular logo here -->
+            <!-- Logo Placeholder -->
             <div class="logo-container">
-                <!-- Place your logo here -->
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="logo">
             </div>
             
             <h1 class="system-title">Système de Demande de Documents en Ligne</h1>
             <p class="system-subtitle">Rapide, facile et sécurisé - Le service documentaire de Menara Holding</p>
         </div>
         
-        <div class="col-md-6 d-flex justify-content-center align-items-center">
+        <div id="box" class="col-md-6 d-flex justify-content-center align-items-center">
             <div class="login-card">
                 <div class="card-header text-center">
                     <h2>Utilisateur</h2>
@@ -22,11 +22,26 @@
                 <div class="card-body">
                     <h4 class="text-center mb-3">CONNECTEZ-VOUS À VOTRE COMPTE</h4>
                     <p class="text-center text-muted mb-4">Demandez des documents en ligne sans effort</p>
+                    @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     
                     <form action="{{ route('login') }}" method="POST">
                         @csrf
                         <div class="mb-3">
-                            <label for="idUtilisateur" class="form-label">ID</label>
+                            <label for="idUtilisateur" class="form-label">ID Utilisateur</label>
                             <input type="text" name="idUtilisateur" id="idUtilisateur" class="form-control" required>
                         </div>
                         <div class="mb-3">
@@ -37,6 +52,12 @@
                             <button type="submit" class="btn btn-connect">connecter</button>
                         </div>
                     </form>
+                    <div class="text-center mt-4">
+                        <hr class="divider">
+                        <a href="{{ route('id.check') }}" class="forgot-password-link">
+                            <i class="fas fa-key me-2"></i>Mot de passe oublié ?
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -48,6 +69,7 @@
 </div>
 
 <style>
+
 /* Main Container */
 #container {
     min-height: 100vh;
@@ -72,10 +94,11 @@
     align-items: center;
     text-align: center;
     padding: 2rem;
-    /* Background will be added by you */
+    background-image: url('{{ asset('images/home.png') }}');
     background-size: cover;
     background-position: center;
     position: relative;
+    border-radius: 0 0 40px 0;
 }
 
 .branding-section::before {
@@ -90,11 +113,14 @@
 }
 
 .logo-container {
-    width: 200px;
-    height: 200px;
+    margin-bottom: 2rem;
     position: relative;
     z-index: 1;
-    margin-bottom: 2rem;
+}
+
+.logo {
+    width: 300px;
+    height: 300px;
 }
 
 .system-title {
@@ -179,6 +205,25 @@ h4 {
     color: #777;
 }
 
+.divider {
+    margin: 20px auto;
+    width: 80%;
+    border-top: 1px solid #eee;
+}
+
+.forgot-password-link {
+    color: #b8a369;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.forgot-password-link:hover {
+    color: #a89355;
+    text-decoration: none;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     .row {
@@ -189,9 +234,9 @@ h4 {
         height: 40vh;
     }
     
-    .logo-container {
-        width: 150px;
-        height: 150px;
+    .logo {
+        width: 100px;
+        height: 100px;
     }
     
     .login-card {

@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\Document;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +18,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::get('/documents', function (Request $request) {
+    return Document::where('statut', 'disponible')
+        ->where('service', $request->service)
+        ->get(['idDocument', 'titre']);
+        
+});
+

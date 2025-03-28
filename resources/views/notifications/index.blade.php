@@ -22,7 +22,7 @@
                             <div>
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-bell me-2 {{ $notification->read ? 'text-muted' : 'text-primary' }}"></i>
-                                    <p class="mb-1">{{ $notification->message }}</p>
+                                    <p class="mb-1">{!! $notification->message !!}</p>
                                 </div>
                                 <small class="text-muted">{{ (new DateTime( $notification->dateEnvoi))->format('d/m/Y H:i') }}</small>
                             </div>

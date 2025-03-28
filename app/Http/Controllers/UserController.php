@@ -38,6 +38,7 @@ class UserController extends Controller
             'direction' => 'nullable|string|max:255',
             'service' => 'nullable|string|max:255',
             'role' => 'required|string|in:Utilisateur,Responsable,Archiviste,Admin',
+            'site' => 'required|string|max:255',
         ]);
 
         User::create([
@@ -49,6 +50,7 @@ class UserController extends Controller
             'direction' => $request->direction,
             'service' => $request->service,
             'role' => $request->role,
+            'site' => $request->site,
         ]);
 
         return redirect()->route('users.index')->with('success', 'Utilisateur créé avec succès.');

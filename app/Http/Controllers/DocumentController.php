@@ -33,6 +33,7 @@ class DocumentController extends Controller
             'societe' => 'nullable|string|max:255',
             'direction' => 'nullable|string|max:255',
             'service' => 'nullable|string|max:255',
+            'duree_max_retour' => 'required|integer|min:1',
         ]);
 
         Document::create([
@@ -41,6 +42,7 @@ class DocumentController extends Controller
             'societe' => $request->societe,
             'direction' => $request->direction,
             'service' => $request->service,
+            'duree_max_retour' => $request->duree_max_retour,
             'statut' => 'disponible'
         ]);
 
@@ -67,6 +69,7 @@ class DocumentController extends Controller
             'societe' => 'nullable|string|max:255',
             'direction' => 'nullable|string|max:255',
             'service' => 'nullable|string|max:255',
+            'duree_max_retour' => 'required|integer|min:1',
             'statut' => 'required|in:disponible,emprunté,archivé'
         ]);
 

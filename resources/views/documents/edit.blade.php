@@ -59,6 +59,15 @@
                     </span>
                 @enderror
             </div>
+            <div class="mb-3">
+                <label for="duree_max_retour" class="form-label">Durée maximale de retour (jours)</label>
+                <input type="number" class="form-control @error('duree_max_retour') is-invalid @enderror" id="duree_max_retour" name="duree_max_retour" value="{{ old('duree_max_retour', $document->duree_max_retour) }}" required min="1">
+                @error('duree_max_retour')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
 
             <div class="mb-3">
                 <label for="statut" class="form-label">Statut</label>

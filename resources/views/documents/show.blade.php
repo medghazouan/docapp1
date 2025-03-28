@@ -49,6 +49,10 @@
                         <td>{{ $document->service ?? 'N/A' }}</td>
                     </tr>
                     <tr>
+                        <th>Durée maximale de retour</th>
+                        <td>{{ $document->duree_max_retour }} jours</td>
+                    </tr>
+                    <tr>
                         <th>Statut</th>
                         <td>
                             <span class="badge bg-{{ $document->statut == 'disponible' ? 'success' : ($document->statut == 'emprunté' ? 'warning' : 'secondary') }}">

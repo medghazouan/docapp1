@@ -84,6 +84,9 @@
                                 <p><strong>Date de récupération:</strong> 
                                     {{ (new DateTime($certificat->demande->dateRecuperation) ) ? (new DateTime($certificat->demande->dateRecuperation)) ->format('d/m/Y H:i') : 'Non récupéré' }}
                                 </p>
+                                <p><strong>Date de retour prévue:</strong> 
+                                    {{ (new DateTime($certificat->demande->dateRetour) ) ? (new DateTime($certificat->demande->dateRetour)) ->format('d/m/Y H:i') : 'Non récupéré' }}
+                                </p>
                             </div>
                         </div>
 
@@ -121,6 +124,17 @@
                                                     Je confirme que l'utilisateur a signé et récupéré le document
                                                 </label>
                                             </div>
+                                            
+                                            <div class="form-group mb-3">
+                                                <label for="duree_max_retour">Durée maximale de retour (jours)</label>
+                                                <input type="number" class="form-control" id="duree_max_retour" name="duree_max_retour" 
+                                                       min="1" max="{{ $certificat->demande->document->duree_max_retour }}" 
+                                                       value="{{ $certificat->demande->document->duree_max_retour }}" required>
+                                                <small class="form-text text-muted">
+                                                    Durée maximale autorisée : {{ $certificat->demande->document->duree_max_retour }} jours
+                                                </small>
+                                            </div>
+                                            
                                             <button type="submit" class="btn btn-success">
                                                 <i class="fas fa-check"></i> Marquer comme récupéré
                                             </button>

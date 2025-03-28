@@ -9,7 +9,7 @@ class Document extends Model
     protected $primaryKey = 'idDocument';
 
     protected $fillable = [
-        'titre', 'type', 'societe', 'direction', 'service', 'statut'
+        'titre', 'type', 'societe', 'direction', 'service', 'statut','duree_max_retour', 'dateRetour'
     ];
 
     public function demandes()
